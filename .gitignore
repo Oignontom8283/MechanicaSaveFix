@@ -1,0 +1,8 @@
+MechanicaMultiplayerFix.sln
+obj/
+bin/
+Assembly-CSharp/
+log/
+tools.config.json
+*.lnk
+output/
