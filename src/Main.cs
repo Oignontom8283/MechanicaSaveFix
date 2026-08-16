@@ -1,4 +1,5 @@
 using BepInEx;
+using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine;
 
@@ -11,11 +12,15 @@ public class MechanicaSaveFix : BaseUnityPlugin
     public const string MOD_NAME = "MechanicaSaveFix";
     public const string MOD_VERSION = "0.1.0";
 
-    void Awake()
-    {
-        Debug.Log("[MechanicaSaveFix] starting up...");
+    internal static ManualLogSource Log;
+    private readonly Harmony harmony = new Harmony(MOD_GUID);
 
-        var harmony = new Harmony(MOD_GUID);
+    private void Awake()
+    {
+        Log = Logger; // Set the logger for this plugin
+        Log.LogInfo($"Mod {MOD_GUID} is loaded!");
+        
+        // Apply Harmony patches
         harmony.PatchAll();
     }
 }
