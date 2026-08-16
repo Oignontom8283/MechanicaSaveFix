@@ -16,4 +16,9 @@ public static class VirtualFS
     /// - `Playback`: Currently playing back save files.
     /// </summary>
     private static Mode _mode = Mode.Idle;
+
+    /// <summary>
+    /// The root directory for the world currently saved.
+    /// </summary>
+    private static string _root;
 }
