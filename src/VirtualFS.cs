@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 
 public enum Mode { Idle, Capturing, Playback }
@@ -22,4 +23,15 @@ public static class VirtualFS
     /// The root directory for the world currently saved.
     /// </summary>
     private static string _root;
+
+    /// <summary>
+    /// Initializes or resets the virtual file system.
+    /// </summary>
+    /// <param name="absoluteRoot"></param>
+    private static void Reset(string absoluteRoot)
+    {
+        _files.Clear();
+        _root = Path.GetFullPath(absoluteRoot);
+    }
+    
 }
