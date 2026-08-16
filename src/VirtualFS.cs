@@ -8,12 +8,12 @@ public static class VirtualFS
     /// </summary>
     private static readonly Dictionary<string, string> _files = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
+    private enum Mode { Idle, Capturing, Playback }
     /// <summary>
     /// Current mode of the capture/playback system.
     /// - `Idle`: Not capturing or playing back.
     /// - `Capturing`: Currently capturing save files.
     /// - `Playback`: Currently playing back save files.
     /// </summary>
-    private enum Mode { Idle, Capturing, Playback }
     private static Mode _mode = Mode.Idle;
 }
