@@ -33,5 +33,14 @@ public static class VirtualFS
         _files.Clear();
         _root = Path.GetFullPath(absoluteRoot);
     }
-    
+
+    /// <summary>
+    /// Begins capturing save files.
+    /// </summary>
+    /// <param name="absoluteRoot"></param>
+    public static void BeginSaveCapture(string absoluteRoot)
+    {
+        Reset(absoluteRoot);
+        _mode = Mode.Capturing;
+    }
 }
