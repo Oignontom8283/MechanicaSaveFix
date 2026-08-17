@@ -213,5 +213,21 @@ public static class VirtualFS
 
     // Methods for managing files in the virtual file system
 
-    ...
+    /// <summary>
+    /// Writes a file to the virtual file system with the specified content.
+    /// </summary>
+    /// <param name="path">The path where the file will be written.</param>
+    /// <param name="content">The content to write to the file.</param>
+    public static void WriteFile(string path, string content)
+    {
+        EnsureInitialized(nameof(WriteFile));
+
+        string absolutePath = Path.GetFullPath(path);
+        string relativePath = ToRelativeSaveFilePath(absolutePath);
+        string sanitizedPath = Utils.SanitizePath(relativePath);
+
+        _files.Add(sanitizedPath, content);
+
+        MechanicaSaveFix.Log.LogDebug($"File {Utils.GetFastHash(content)} written to VFS: {sanitizedPath}");
+    }
 }
