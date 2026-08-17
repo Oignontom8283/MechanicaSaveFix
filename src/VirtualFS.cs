@@ -149,6 +149,8 @@ public static class VirtualFS
         Utils.IsSubPathOf(_root, Path.GetFullPath(absolutePath)); // Check if the absolute path is a subpath of the root directory (file in the save folder).
 
 
+    // Methods for managing capture and playback operations
+
     /// <summary>
     /// Begins capturing save files.
     /// </summary>
@@ -205,4 +207,8 @@ public static class VirtualFS
         MechanicaSaveFix.Log.LogInfo($"Operation (capture/playback) ended. Current mode is now {_mode}.");
     }
 
+
+    // Methods for managing files in the virtual file system
+
+    ...
 }
