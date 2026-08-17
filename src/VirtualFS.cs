@@ -47,6 +47,20 @@ public static class VirtualFS
         _root = Path.GetFullPath(RootSaveDirectory);
     }
 
+    /// <summary>
+    /// Ensures that the virtual file system has been initialized before performing any operations.
+    /// </summary>
+    /// <param name="caller">Name of the calling method.</param>
+    /// <exception cref="InvalidOperationException">Thrown when the virtual file system is not initialized.</exception>
+    private static void EnsureInitialized(string caller)
+    {
+        if (!_isInitialized)
+        {
+            throw new InvalidOperationException($"VirtualFS.{caller}: Virtual file system is not initialized. Call Initialize() first!");
+        }
+    }
+
+
     // Utilitary methods for managing the virtual file system
 
     /// <summary>
