@@ -29,6 +29,7 @@ public static class VirtualFS
     /// </summary>
     private static string _root;
 
+
     /// <summary>
     /// Initializes the virtual file system with the specified root save directory.
     /// </summary>
@@ -45,6 +46,27 @@ public static class VirtualFS
         }
         _isInitialized = true;
         _root = Path.GetFullPath(RootSaveDirectory);
+    }
+
+    /// <summary>
+    /// Checks if the virtual file system has been initialized.
+    /// </summary>
+    /// <returns><c>true</c> if the virtual file system has been initialized; otherwise, <c>false</c>.</returns>
+    public static bool IsInitialized() => _isInitialized;
+
+    /// <summary>
+    /// Deinitializes the virtual file system, clearing all stored files and resetting the initialization flag.
+    /// </summary>
+    /// <remarks>
+    /// This method should be called when the virtual file system is no longer needed or before re-initializing it.
+    /// </remarks>
+    public static void Deinitialize()
+    {
+        EnsureInitialized(nameof(Deinitialize));
+        
+        _root = null;
+        _files.Clear();
+        _isInitialized = false;
     }
 
     /// <summary>
