@@ -153,7 +153,8 @@ public static class VirtualFS
     /// Begins capturing save files.
     /// </summary>
     /// <remarks>
-    /// The VFS must be initialized before calling this method!
+    /// <b>The VFS must be initialized before calling this method!</b>
+    /// <para>To finish the capture, call <see cref="EndOperation"/>.</para>
     /// </remarks>
     public static void BeginSaveCapture()
     {
@@ -167,7 +168,8 @@ public static class VirtualFS
     /// Begins playback of captured save files.
     /// </summary>
     /// <remarks>
-    /// The VFS must be initialized before calling this method!
+    /// <b>The VFS must be initialized before calling this method!</b>
+    /// <para>To finish the playback, call <see cref="EndOperation"/>.</para>
     /// </remarks>
     public static void BeginLoadPlayback()
     {
@@ -186,7 +188,10 @@ public static class VirtualFS
     /// <summary>
     /// Ends the current capture or playback operation, returning the system to idle mode.
     /// </summary>
-    /// <exception cref="InvalidOperationException"></exception>
+    /// <exception cref="InvalidOperationException">Thrown when there is no active operation to end.</exception>
+    /// <remarks>
+    /// <b>Throws an exception if called when the system is not in capturing or playback mode.</b>
+    /// </remarks>
     public static void EndOperation()
     {
         EnsureInitialized(nameof(EndOperation));
