@@ -106,6 +106,7 @@ public static class VirtualFS
     /// <exception cref="InvalidOperationException">Thrown when the virtual file system is not empty.</exception>
     private static void RequireEmpty(string caller)
     {
+        EnsureInitialized(nameof(RequireEmpty));
         if (_files.Count != 0)
         {
             throw new InvalidOperationException($"VirtualFS.{caller}: Expected empty virtual file system, but found {_files.Count} files. (Use Clear() to reset.)");
@@ -119,6 +120,7 @@ public static class VirtualFS
     /// <exception cref="InvalidOperationException">Thrown when the virtual file system is empty.</exception>
     private static void RequireNotEmpty(string caller)
     {
+        EnsureInitialized(nameof(RequireNotEmpty));
         if (_files.Count == 0)
         {
             throw new InvalidOperationException($"VirtualFS.{caller}: Expected non-empty virtual file system, but found 0 files. (A previous capture might not have been properly completed or cleared.)");
@@ -143,6 +145,7 @@ public static class VirtualFS
     /// </remarks>
     private static string ToRelativeSaveFilePath(string absoluteSaveFilePath)
     {
+        EnsureInitialized(nameof(ToRelativeSaveFilePath));
         return Path.GetRelativePath(_root, absoluteSaveFilePath);
     }
 
