@@ -142,9 +142,10 @@ public static class VirtualFS
     /// <param name="absolutePath">The absolute path to check.</param>
     /// <returns><c>true</c> if the path is within the scope; otherwise, <c>false</c>.</returns>
     /// <remarks>
-    /// Whether the targeted file should be sent to the VFS or passed through to the OS.
+    /// Check whether the intercepted file belongs to the files in the current save.
+    /// </remarks>
     public static bool inScore(string absolutePath) =>
-        _mode != Mode.Idle && IsInitialized() && // Check if the vfs is initialized and the mode is not idle.
+        IsInitialized() && // Check if the vfs is initialized
         Utils.IsSubPathOf(_root, Path.GetFullPath(absolutePath)); // Check if the absolute path is a subpath of the root directory (file in the save folder).
 
     /// <summary>
