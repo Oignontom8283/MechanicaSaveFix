@@ -2,7 +2,7 @@ using System.IO;
 
 public static class Utils
 {
-    
+
     /// <summary>
     /// Checks if a target path (file or directory) is located inside a parent directory.
     /// </summary>
@@ -18,4 +18,14 @@ public static class Utils
             !Path.IsPathRooted(relativePath); // Handles edge cases on different drives/roots (e.g., C:\ vs D:\)
     }
     
+    /// <summary>
+    /// Sanitizes a file path by replacing backslashes with forward slashes and removing any leading slashes.
+    /// </summary>
+    /// <param name="path">The file path to sanitize.</param>
+    /// <returns>The sanitized file path.</returns>
+    /// <remarks>
+    /// Necessary for zip file compatibility!
+    /// </remarks>
+    private static string SanitizePath(string path) => path.Replace('\\', '/').TrimStart('/');
+
 }
