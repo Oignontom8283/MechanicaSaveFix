@@ -218,11 +218,10 @@ public static class VirtualFS
     /// </summary>
     /// <param name="path">The path where the file will be written.</param>
     /// <param name="content">The content to write to the file.</param>
-    public static void WriteFile(string AbsolutePath, string content)
+    public static void WriteFile(string absolutePath, string content)
     {
         EnsureInitialized(nameof(WriteFile));
 
-        string absolutePath = Path.GetFullPath(AbsolutePath);
         string relativePath = ToRelativeSaveFilePath(absolutePath);
         string sanitizedPath = Utils.SanitizePath(relativePath);
 
@@ -242,6 +241,8 @@ public static class VirtualFS
 
         string relativePath = ToRelativeSaveFilePath(absolutePath);
         string sanitizedPath = Utils.SanitizePath(relativePath);
+
+        MechanicaSaveFix.Log.LogDebug($"Checking existence of file in VFS: {sanitizedPath}");
 
         return _files.ContainsKey(sanitizedPath);
     }
