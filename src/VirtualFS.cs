@@ -164,11 +164,16 @@ public static class VirtualFS
     }
 
     /// <summary>
-    /// Begins playback of previously captured save files.
+    /// Begins playback of captured save files.
     /// </summary>
-    /// <param name="absoluteRoot"></param>
-    public static void BeginLoadPlayback(string absoluteRoot)
+    /// <remarks>
+    /// The VFS must be initialized before calling this method!
+    /// </remarks>
+    public static void BeginLoadPlayback()
     {
-
+        EnsureInitialized(nameof(BeginLoadPlayback));
+        RequiredMod(Mode.Idle, nameof(BeginLoadPlayback));
+        _mode = Mode.Playback;
+        MechanicaSaveFix.Log.LogInfo($"Save playback started in \"{_root}\"!");
     }
 }
