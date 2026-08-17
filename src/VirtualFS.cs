@@ -9,6 +9,9 @@ public static class VirtualFS
     /// <summary>
     /// A dictionary that maps file paths to their corresponding content in the virtual file system.
     /// </summary>
+    /// <remarks>
+    /// File paths must be <b>relative to the root</b> save directory <b>AND sanitized</b> (slashes instead of backslashes, no leading slash)!
+    /// </remarks>
     private static readonly Dictionary<string, string> _files = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
