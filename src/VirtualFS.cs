@@ -25,6 +25,23 @@ public static class VirtualFS
     private static string _root;
 
 
+    // Utilitary methods for managing the virtual file system
+
+    /// <summary>
+    /// Ensures that the current mode matches the expected mode for a given operation.
+    /// </summary>
+    /// <param name="expected"></param>
+    /// <param name="caller"></param>
+    /// <exception cref="InvalidOperationException"></exception>
+    private static void RequiredMod(Mode expected, string caller)
+    {
+        if (_mode != expected)
+        {
+            throw new InvalidOperationException($"VirtualFS.{caller}: Expected mode {expected}, but current mode is {_mode}.");
+        }
+    }
+
+
     /// <summary>
     /// Begins capturing save files.
     /// </summary>
