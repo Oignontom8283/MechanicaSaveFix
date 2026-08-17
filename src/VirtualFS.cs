@@ -7,6 +7,11 @@ public enum Mode { Idle, Capturing, Playback,  }
 public static class VirtualFS
 {
     /// <summary>
+    /// Indicates whether the virtual file system has been initialized. This flag is set to true after the first call to Initialize() and prevents re-initialization.
+    /// </summary>
+    private static bool _isInitialized = false;
+
+    /// <summary>
     /// A dictionary that maps file paths to their corresponding content in the virtual file system.
     /// </summary>
     private static readonly Dictionary<string, string> _files = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -24,6 +29,23 @@ public static class VirtualFS
     /// </summary>
     private static string _root;
 
+    /// <summary>
+    /// Initializes the virtual file system with the specified root save directory.
+    /// </summary>
+    /// <param name="RootSaveDirectory">The root save directory.</param>
+    /// <exception cref="InvalidOperationException">Thrown when the virtual file system is already initialized.</exception>
+    /// <remarks>
+    /// This method must be called before any other operations on the virtual file system.
+    /// </remarks>
+    public static void Initialize(string RootSaveDirectory)
+    {
+        if (_isInitialized)
+        {
+            throw new InvalidOperationException("VirtualFS.Initialize: Already initialized.");
+        }
+        _isInitialized = true;
+        _root = RootSaveDirectory;
+    }
 
     // Utilitary methods for managing the virtual file system
 
