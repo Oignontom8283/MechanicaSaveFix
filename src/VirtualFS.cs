@@ -32,7 +32,7 @@ public static class VirtualFS
     /// </summary>
     /// <param name="expected">The expected mode.</param>
     /// <param name="caller">Name of the calling method.</param>
-    /// <exception cref="InvalidOperationException"></exception>
+    /// <exception cref="InvalidOperationException">Thrown when the current mode does not match the expected mode.</exception>
     private static void RequiredMod(Mode expected, string caller)
     {
         if (_mode != expected)
@@ -45,7 +45,7 @@ public static class VirtualFS
     /// Ensures that the virtual file system is empty before performing certain operations.
     /// </summary>
     /// <param name="caller">Name of the calling method.</param>
-    /// <exception cref="InvalidOperationException"></exception>
+    /// <exception cref="InvalidOperationException">Thrown when the virtual file system is not empty.</exception>
     private static void RequireEmpty(string caller)
     {
         if (_files.Count != 0)
@@ -58,7 +58,7 @@ public static class VirtualFS
     /// Ensures that the virtual file system is not empty before performing certain operations.
     /// </summary>
     /// <param name="caller">Name of the calling method.</param>
-    /// <exception cref="InvalidOperationException"></exception>
+    /// <exception cref="InvalidOperationException">Thrown when the virtual file system is empty.</exception>
     private static void RequireNotEmpty(string caller)
     {
         if (_files.Count == 0)
