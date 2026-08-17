@@ -178,6 +178,12 @@ public static class VirtualFS
     }
 
     /// <summary>
+    /// Checks if there is an active capture or playback operation.
+    /// </summary>
+    /// <returns><c>true</c> if an operation is active; otherwise, <c>false</c>.</returns>
+    public static bool IsOperationActive() => _mode != Mode.Idle;
+
+    /// <summary>
     /// Ends the current capture or playback operation, returning the system to idle mode.
     /// </summary>
     /// <exception cref="InvalidOperationException"></exception>
@@ -185,7 +191,7 @@ public static class VirtualFS
     {
         EnsureInitialized(nameof(EndOperation));
         
-        if (_mode == Mode.Idle)
+        if (!IsOperationActive())
         {
             throw new InvalidOperationException($"VirtualFS.{nameof(EndOperation)}: No active operation to end. Current mode is {_mode}.");
         }
@@ -193,4 +199,5 @@ public static class VirtualFS
         _mode = Mode.Idle;
         MechanicaSaveFix.Log.LogInfo($"Operation (capture/playback) ended. Current mode is now {_mode}.");
     }
+
 }
