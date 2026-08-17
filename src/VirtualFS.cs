@@ -7,11 +7,6 @@ public enum Mode { Idle, Capturing, Playback,  }
 public static class VirtualFS
 {
     /// <summary>
-    /// Indicates whether the virtual file system has been initialized. This flag is set to true after the first call to Initialize() and prevents re-initialization.
-    /// </summary>
-    private static bool _isInitialized = false;
-
-    /// <summary>
     /// A dictionary that maps file paths to their corresponding content in the virtual file system.
     /// </summary>
     private static readonly Dictionary<string, string> _files = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -31,6 +26,12 @@ public static class VirtualFS
 
 
     /// <summary>
+    /// Checks if the virtual file system has been initialized.
+    /// </summary>
+    /// <returns><c>true</c> if the virtual file system has been initialized; otherwise, <c>false</c>.</returns>
+    public static bool IsInitialized() => _root != null;
+
+    /// <summary>
     /// Initializes the virtual file system with the specified root save directory.
     /// </summary>
     /// <param name="RootSaveDirectory">The root save directory.</param>
@@ -40,19 +41,12 @@ public static class VirtualFS
     /// </remarks>
     public static void Initialize(string RootSaveDirectory)
     {
-        if (_isInitialized)
+        if (IsInitialized())
         {
             throw new InvalidOperationException("VirtualFS.Initialize: Already initialized.");
         }
-        _isInitialized = true;
         _root = Path.GetFullPath(RootSaveDirectory);
     }
-
-    /// <summary>
-    /// Checks if the virtual file system has been initialized.
-    /// </summary>
-    /// <returns><c>true</c> if the virtual file system has been initialized; otherwise, <c>false</c>.</returns>
-    public static bool IsInitialized() => _isInitialized;
 
     /// <summary>
     /// Deinitializes the virtual file system, clearing all stored files and resetting the initialization flag.
@@ -66,7 +60,7 @@ public static class VirtualFS
         
         _root = null;
         _files.Clear();
-        _isInitialized = false;
+
     }
 
     /// <summary>
@@ -76,7 +70,7 @@ public static class VirtualFS
     /// <exception cref="InvalidOperationException">Thrown when the virtual file system is not initialized.</exception>
     private static void EnsureInitialized(string caller)
     {
-        if (!_isInitialized)
+        if (!IsInitialized())
         {
             throw new InvalidOperationException($"VirtualFS.{caller}: Virtual file system is not initialized. Call Initialize() first!");
         }
