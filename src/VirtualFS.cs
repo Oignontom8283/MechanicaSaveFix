@@ -144,9 +144,10 @@ public static class VirtualFS
     /// <remarks>
     /// Check whether the intercepted file belongs to the files in the current save.
     /// </remarks>
-    public static bool inScore(string absolutePath) =>
+    public static bool InScore(string absolutePath) =>
         IsInitialized() && // Check if the vfs is initialized
         Utils.IsSubPathOf(_root, Path.GetFullPath(absolutePath)); // Check if the absolute path is a subpath of the root directory (file in the save folder).
+
 
     /// <summary>
     /// Begins capturing save files.
