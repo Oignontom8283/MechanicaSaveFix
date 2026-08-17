@@ -218,11 +218,11 @@ public static class VirtualFS
     /// </summary>
     /// <param name="path">The path where the file will be written.</param>
     /// <param name="content">The content to write to the file.</param>
-    public static void WriteFile(string path, string content)
+    public static void WriteFile(string AbsolutePath, string content)
     {
         EnsureInitialized(nameof(WriteFile));
 
-        string absolutePath = Path.GetFullPath(path);
+        string absolutePath = Path.GetFullPath(AbsolutePath);
         string relativePath = ToRelativeSaveFilePath(absolutePath);
         string sanitizedPath = Utils.SanitizePath(relativePath);
 
