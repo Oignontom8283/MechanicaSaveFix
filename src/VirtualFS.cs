@@ -214,23 +214,6 @@ public static class VirtualFS
     // Methods for managing files in the virtual file system
 
     /// <summary>
-    /// Writes a file to the virtual file system with the specified content.
-    /// </summary>
-    /// <param name="path">The path where the file will be written.</param>
-    /// <param name="content">The content to write to the file.</param>
-    public static void WriteFile(string absolutePath, string content)
-    {
-        EnsureInitialized(nameof(WriteFile));
-
-        string relativePath = ToRelativeSaveFilePath(absolutePath);
-        string sanitizedPath = Utils.SanitizePath(relativePath);
-
-        _files.Add(sanitizedPath, content);
-
-        MechanicaSaveFix.Log.LogDebug($"File {Utils.GetFastHash(content)} written to VFS: {sanitizedPath}");
-    }
-
-    /// <summary>
     /// Checks if a file exists in the virtual file system based on its absolute path.
     /// </summary>
     /// <param name="absolutePath">The absolute path of the file to check.</param>
@@ -245,5 +228,22 @@ public static class VirtualFS
         MechanicaSaveFix.Log.LogDebug($"Checking existence of file in VFS: {sanitizedPath}");
 
         return _files.ContainsKey(sanitizedPath);
+    }
+
+    /// <summary>
+    /// Writes a file to the virtual file system with the specified content.
+    /// </summary>
+    /// <param name="path">The path where the file will be written.</param>
+    /// <param name="content">The content to write to the file.</param>
+    public static void WriteFile(string absolutePath, string content)
+    {
+        EnsureInitialized(nameof(WriteFile));
+
+        string relativePath = ToRelativeSaveFilePath(absolutePath);
+        string sanitizedPath = Utils.SanitizePath(relativePath);
+
+        _files.Add(sanitizedPath, content);
+
+        MechanicaSaveFix.Log.LogDebug($"File {Utils.GetFastHash(content)} written to VFS: {sanitizedPath}");
     }
 }
