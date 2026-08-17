@@ -160,7 +160,7 @@ public static class VirtualFS
         EnsureInitialized(nameof(BeginSaveCapture));
         RequiredMod(Mode.Idle, nameof(BeginSaveCapture));
         _mode = Mode.Capturing;
-        MechanicaSaveFix.Log.LogInfo($"Save capture started in \"{_root}\" !");
+        MechanicaSaveFix.Log.LogInfo($"Save capture started in \"{_root}\"!");
     }
 
     /// <summary>
@@ -175,5 +175,22 @@ public static class VirtualFS
         RequiredMod(Mode.Idle, nameof(BeginLoadPlayback));
         _mode = Mode.Playback;
         MechanicaSaveFix.Log.LogInfo($"Save playback started in \"{_root}\"!");
+    }
+
+    /// <summary>
+    /// Ends the current capture or playback operation, returning the system to idle mode.
+    /// </summary>
+    /// <exception cref="InvalidOperationException"></exception>
+    public static void EndOperation()
+    {
+        EnsureInitialized(nameof(EndOperation));
+        
+        if (_mode == Mode.Idle)
+        {
+            throw new InvalidOperationException($"VirtualFS.{nameof(EndOperation)}: No active operation to end. Current mode is {_mode}.");
+        }
+
+        _mode = Mode.Idle;
+        MechanicaSaveFix.Log.LogInfo($"Operation (capture/playback) ended. Current mode is now {_mode}.");
     }
 }
