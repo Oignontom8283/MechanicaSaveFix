@@ -24,8 +24,7 @@ public static class Utils
     /// <param name="path">The file path to sanitize.</param>
     /// <returns>The sanitized file path.</returns>
     /// <remarks>
-    /// Necessary for zip file compatibility!
+    /// <b>Necessary for zip file compatibility!</b>
     /// </remarks>
-    private static string SanitizePath(string path) => path.Replace('\\', '/').TrimStart('/');
-
+    public static string SanitizePath(string path) => path.Replace('\\', '/').TrimStart('/');
 }
