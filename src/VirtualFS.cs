@@ -230,4 +230,19 @@ public static class VirtualFS
 
         MechanicaSaveFix.Log.LogDebug($"File {Utils.GetFastHash(content)} written to VFS: {sanitizedPath}");
     }
+
+    /// <summary>
+    /// Checks if a file exists in the virtual file system based on its absolute path.
+    /// </summary>
+    /// <param name="absolutePath">The absolute path of the file to check.</param>
+    /// <returns><c>true</c> if the file exists; otherwise, <c>false</c>.</returns>
+    public static bool IsExistFile(string absolutePath)
+    {
+        EnsureInitialized(nameof(IsExistFile));
+
+        string relativePath = ToRelativeSaveFilePath(absolutePath);
+        string sanitizedPath = Utils.SanitizePath(relativePath);
+
+        return _files.ContainsKey(sanitizedPath);
+    }
 }
