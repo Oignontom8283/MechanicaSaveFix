@@ -30,8 +30,8 @@ public static class VirtualFS
     /// <summary>
     /// Ensures that the current mode matches the expected mode for a given operation.
     /// </summary>
-    /// <param name="expected"></param>
-    /// <param name="caller"></param>
+    /// <param name="expected">The expected mode.</param>
+    /// <param name="caller">Name of the calling method.</param>
     /// <exception cref="InvalidOperationException"></exception>
     private static void RequiredMod(Mode expected, string caller)
     {
