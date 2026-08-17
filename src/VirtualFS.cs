@@ -55,6 +55,19 @@ public static class VirtualFS
     }
 
     /// <summary>
+    /// Ensures that the virtual file system is not empty before performing certain operations.
+    /// </summary>
+    /// <param name="caller">Name of the calling method.</param>
+    /// <exception cref="InvalidOperationException"></exception>
+    private static void RequireNotEmpty(string caller)
+    {
+        if (_files.Count == 0)
+        {
+            throw new InvalidOperationException($"VirtualFS.{caller}: Expected non-empty virtual file system, but found 0 files. (A previous capture might not have been properly completed or cleared.)");
+        }
+    }
+
+    /// <summary>
     /// Begins capturing save files.
     /// </summary>
     /// <param name="absoluteRoot"></param>
