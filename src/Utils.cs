@@ -1,4 +1,5 @@
 using System.IO;
+using System.Text;
 
 public static class Utils
 {
@@ -27,4 +28,25 @@ public static class Utils
     /// <b>Necessary for zip file compatibility!</b>
     /// </remarks>
     public static string SanitizePath(string path) => path.Replace('\\', '/').TrimStart('/');
+
+    /// <summary>
+    /// Calculates a fast hash for a given string using the FNV-1a algorithm.
+    /// </summary>
+    /// <param name="input">The string to hash.</param>
+    /// <returns>The calculated hash.</returns>
+    public static string GetFastHash(string input)
+    {
+        if (string.IsNullOrEmpty(input)) return "00000000";
+
+        byte[] bytes = Encoding.UTF8.GetBytes(input);
+        uint hash = 2166136261; 
+
+        foreach (byte b in bytes)
+        {
+            hash ^= b;
+            hash *= 16777619;
+        }
+
+        return hash.ToString("X8");
+    }
 }
