@@ -74,6 +74,19 @@ public static class VirtualFS
     /// <returns>The sanitized file path.</returns>
     private static string SanitizePath(String path) => path.Replace('\\', '/').TrimStart('/');
 
+    /// <summary>
+    /// Converts an absolute save file path to a relative path based on the save root directory.
+    /// 
+    /// </summary>
+    /// <param name="absoluteSaveFilePath">The absolute save file path.</param>
+    /// <returns>The relative save file path.</returns>
+    /// <remarks>
+    /// This method don't sanitize the path!
+    /// </remarks>
+    private static string ToRelativeSaveFilePath(string absoluteSaveFilePath)
+    {
+        return Path.GetRelativePath(_root, absoluteSaveFilePath);
+    }
 
     /// <summary>
     /// Begins capturing save files.
