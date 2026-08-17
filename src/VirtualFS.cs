@@ -68,6 +68,14 @@ public static class VirtualFS
     }
 
     /// <summary>
+    /// Sanitizes a file path by replacing backslashes with forward slashes and removing any leading slashes. Necessary for zip file compatibility!
+    /// </summary>
+    /// <param name="path">The file path to sanitize.</param>
+    /// <returns>The sanitized file path.</returns>
+    private static string SanitizePath(String path) => path.Replace('\\', '/').TrimStart('/');
+
+
+    /// <summary>
     /// Begins capturing save files.
     /// </summary>
     /// <param name="absoluteRoot"></param>
