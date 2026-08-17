@@ -246,4 +246,21 @@ public static class VirtualFS
 
         MechanicaSaveFix.Log.LogDebug($"File {Utils.GetFastHash(content)} written to VFS: {sanitizedPath}");
     }
+
+    /// <summary>
+    /// Reads a file from the virtual file system based on its absolute path.
+    /// </summary>
+    /// <param name="absolutePath">The absolute path of the file to read.</param>
+    /// <returns>The content of the file.</returns>
+    /// <exception cref="KeyNotFoundException">Thrown when the file is not found in the virtual file system.</exception>
+    public static string ReadFile(string absolutePath)
+    {
+        EnsureInitialized(nameof(ReadFile));
+
+        string relativePath = ToRelativeSaveFilePath(absolutePath);
+        string sanitizedPath = Utils.SanitizePath(relativePath);
+
+        // Automatically crash if the file doesn't exist in the virtual file system, as this indicates a serious issue with the capture/playback process.
+        return _files[sanitizedPath];
+    }
 }
