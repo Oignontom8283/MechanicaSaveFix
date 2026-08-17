@@ -44,7 +44,7 @@ public static class VirtualFS
             throw new InvalidOperationException("VirtualFS.Initialize: Already initialized.");
         }
         _isInitialized = true;
-        _root = RootSaveDirectory;
+        _root = Path.GetFullPath(RootSaveDirectory);
     }
 
     // Utilitary methods for managing the virtual file system
