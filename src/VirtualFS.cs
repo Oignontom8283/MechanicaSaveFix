@@ -152,10 +152,15 @@ public static class VirtualFS
     /// <summary>
     /// Begins capturing save files.
     /// </summary>
-    /// <param name="absoluteRoot"></param>
-    public static void BeginSaveCapture(string absoluteRoot)
+    /// <remarks>
+    /// The VFS must be initialized before calling this method!
+    /// </remarks>
+    public static void BeginSaveCapture()
     {
-
+        EnsureInitialized(nameof(BeginSaveCapture));
+        RequiredMod(Mode.Idle, nameof(BeginSaveCapture));
+        _mode = Mode.Capturing;
+        MechanicaSaveFix.Log.LogInfo($"Save capture started in \"{_root}\" !");
     }
 
     /// <summary>
