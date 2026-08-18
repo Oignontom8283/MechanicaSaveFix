@@ -1,5 +1,6 @@
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 
 public static class Utils
 {
@@ -48,5 +49,37 @@ public static class Utils
         }
 
         return hash.ToString("X8");
+    }
+
+    /// <summary>
+    /// Converts a wildcard pattern (using '*' and '?') into a regular expression for matching file paths.
+    /// </summary>
+    /// <param name="pattern">The wildcard pattern to convert.</param>
+    /// <returns>The equivalent regular expression.</returns>
+    public static Regex WildCardToRegex(string pattern)
+    {
+        if (string.IsNullOrEmpty(pattern)) pattern = "*";
+
+        var sb = new StringBuilder();
+        sb.Append('^');
+
+        foreach (char c in pattern)
+        {
+            switch (c)
+            {
+                case '*':
+                    sb.Append(".*");
+                    break;
+                case '?':
+                    sb.Append('.');
+                    break;
+                default:
+                    sb.Append(Regex.Escape(c.ToString()));
+                    break;
+            }
+        }
+
+        sb.Append('$');
+        return new Regex(sb.ToString(), RegexOptions.Compiled);
     }
 }
