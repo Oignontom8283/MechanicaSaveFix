@@ -79,4 +79,7 @@ public static class Forward
     public static IEnumerable<string> EnumerateFiles(string absoluteDir, string searchPattern) =>
         VirtualFS.QueryEntries(absoluteDir, searchPattern, recursive: false, EntryKind.Files);
 
+    public static IEnumerable<string> EnumerateFiles(string absoluteDir, string searchPattern, SearchOption searchOption) =>
+        VirtualFS.QueryEntries(absoluteDir, searchPattern, searchOption == SearchOption.AllDirectories, EntryKind.Files);
+
 }
