@@ -263,13 +263,12 @@ public static class VirtualFS
         string relativePath = ToRelativeSaveFilePath(absolutePath);
         string sanitizedPath = Utils.SanitizePath(relativePath);
 
-        if (_files.ContainsKey(sanitizedPath))
+        if (!_files.TryAdd(sanitizedPath, bytes))
         {
             throw new InvalidOperationException($"VirtualFS.{nameof(WriteBinaryFile)}: File already exists in virtual file system: {sanitizedPath}");
         }
 
         MechanicaSaveFix.Log.LogDebug($"Writing file {Utils.GetFastHash(bytes)} to VFS: {sanitizedPath}");
-        _files.Add(sanitizedPath, bytes);
     }
 
     /// <summary>
@@ -285,12 +284,10 @@ public static class VirtualFS
         string relativePath = ToRelativeSaveFilePath(absolutePath);
         string sanitizedPath = Utils.SanitizePath(relativePath);
 
-        if (!_files.ContainsKey(sanitizedPath))
+        if (!_files.TryGetValue(sanitizedPath, out byte[] fileContent))
         {
             throw new KeyNotFoundException($"VirtualFS.{nameof(ReadBinaryFile)}: File not found in virtual file system: {sanitizedPath}");
         }
-
-        byte[] fileContent = _files[sanitizedPath];
 
         MechanicaSaveFix.Log.LogDebug($"Reading file {Utils.GetFastHash(fileContent)} from VFS: {sanitizedPath}");
         return fileContent;
