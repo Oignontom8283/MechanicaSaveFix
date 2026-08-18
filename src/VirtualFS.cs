@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 
 public enum Mode { Idle, Capturing, Playback,  }
 
@@ -273,5 +274,22 @@ public static class VirtualFS
 
         // Automatically crash if the file doesn't exist in the virtual file system, as this indicates a serious issue with the capture/playback process.
         return _files[sanitizedPath];
+    }
+
+    /// <summary>
+    /// Gets all files in the virtual file system that are located directly within the specified absolute directory.
+    /// </summary>
+    /// <param name="absoluteDir">The absolute path of the directory to search.</param>
+    /// <returns>An array of absolute paths for the files found.</returns>
+    public static string[] GetFilesIn(string absoluteDir)
+    {
+        string relDir = ToRelativeSaveFilePath(absoluteDir);
+        string prefix = relDir.Length == 0 ? "" : relDir + "/";
+
+        return _files.Keys
+            .Where(k => k.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+                        && k.IndexOf('/', prefix.Length) < 0) // pas de '/' après le préfixe = fichier direct
+            .Select(ToAbsoluteFake)
+            .ToArray();
     }
 }
