@@ -250,7 +250,7 @@ public static class VirtualFS
     /// <summary>
     /// Writes a file to the virtual file system with the specified content.
     /// </summary>
-    /// <param name="path">The path where the file will be written.</param>
+    /// <param name="absolutePath">The path where the file will be written.</param>
     /// <param name="content">The content to write to the file.</param>
     public static void WriteFile(string absolutePath, string content)
     {
