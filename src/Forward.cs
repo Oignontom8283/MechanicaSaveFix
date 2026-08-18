@@ -38,4 +38,9 @@ public static class Forward
 
     // CreateDirectory is not implemented because the virtual file system does not support creating directories directly. Instead, directories are created implicitly when files are written to them.
 
+    
+    // Get files operations
+    public static string[] GetFiles(string absoluteDir) =>
+        VirtualFS.QueryEntries(absoluteDir, "*", recursive: false, EntryKind.Files).ToArray();
+
 }
