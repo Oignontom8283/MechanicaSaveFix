@@ -89,7 +89,7 @@ public static class VirtualFS
     /// <param name="expected">The expected mode.</param>
     /// <param name="caller">Name of the calling method.</param>
     /// <exception cref="InvalidOperationException">Thrown when the current mode does not match the expected mode.</exception>
-    private static void RequiredMod(Mode expected, string caller)
+    private static void RequiredMode(Mode expected, string caller)
     {
         if (_mode != expected)
         {
