@@ -283,38 +283,56 @@ public static class VirtualFS
         return _files[sanitizedPath];
     }
 
+    /// <summary>
+    /// Queries the virtual file system for entries (files and/or directories) based on the specified parameters.
+    /// </summary>
+    /// <param name="absoluteDir">The absolute path of the directory to search.</param>
+    /// <param name="searchPattern">The wildcard pattern to match against file and directory names.</param>
+    /// <param name="recursive">Indicates whether to search recursively within subdirectories.</param>
+    /// <param name="kind">The type of entries to include in the results.</param>
+    /// <returns>An enumerable collection of matching entry paths.</returns>
     private static IEnumerable<string> QueryEntries(string absoluteDir, string searchPattern, bool recursive, EntryKind kind)
     {
+        // Normalize target path to the virtual file system's relative format
         string relDir = ToRelativeSaveFilePath(absoluteDir);
+        // Ensure trailing slash for prefix matching unless targeting root
         string prefix = relDir.Length == 0 ? "" : relDir + "/";
+        // Convert wildcard pattern (*, ?) into an executable Regex
         Regex regex = Utils.WildcardToRegex(searchPattern);
 
+        // Track yielded directory names to prevent duplicate results
         var seenDirs = new HashSet<string>(StringComparer.Ordinal);
 
         foreach (string key in _files.Keys)
         {
+            // Skip entries outside the target directory path
             if (!key.StartsWith(prefix, StringComparison.Ordinal))
                 continue;
 
+            // Get relative path remainder after the prefix
             string remainder = key.Substring(prefix.Length);
             int slashIndex = remainder.IndexOf('/');
             bool isDirectChild = slashIndex < 0;
 
             if (isDirectChild)
             {
+                // Process files located directly inside the target directory
                 if ((kind == EntryKind.Files || kind == EntryKind.Both) && regex.IsMatch(remainder))
                     yield return ToAbsoluteFake(key);
             }
             else
             {
+                // Extract immediate top-level subdirectory name
                 string immediateSubdir = remainder.Substring(0, slashIndex);
 
+                // Yield subdirectories once if requested
                 if (kind == EntryKind.Directories || kind == EntryKind.Both)
                 {
                     if (seenDirs.Add(immediateSubdir))
                         yield return ToAbsoluteFake(prefix + immediateSubdir);
                 }
 
+                // Yield nested files in deeper subdirectories when recursive search is enabled
                 if (recursive && (kind == EntryKind.Files || kind == EntryKind.Both))
                 {
                     string fileName = remainder.Substring(remainder.LastIndexOf('/') + 1);
