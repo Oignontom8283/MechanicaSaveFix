@@ -1,4 +1,4 @@
-$ConfigPath = ".\tools.config.json"
+$ConfigPath = ".\path.user.json"
 $DefaultConfig = @{
     GameData = "C:\Users\$env:USERNAME\AppData\LocalLow\Deimos Interactive\Mechanica"
     GameDir = "C:\Program Files (x86)\Steam\steamapps\common\Mechanica"
@@ -19,8 +19,8 @@ $OutPutFile = Join-Path $OutputDir "$projName.dll"
 
 # Check if the config file exists, if not, show an error message and the default config content, then exit
 if (-Not (Test-Path $ConfigPath)) {
-    Write-Host "ERROR: tools.config.json not found !" -ForegroundColor Red
-    Write-Host "HELP: Please create a tools.config.json file with the following content:" -ForegroundColor Cyan
+    Write-Host "ERROR: $ConfigPath not found !" -ForegroundColor Red
+    Write-Host "HELP: Please create a $ConfigPath file with the following content:" -ForegroundColor Cyan
     Write-Host ($DefaultConfig | ConvertTo-Json -Depth 3) -ForegroundColor Cyan
     exit 1
 }
