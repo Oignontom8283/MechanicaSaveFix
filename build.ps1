@@ -4,7 +4,7 @@ $DefaultConfig = @{
     GameDir = "C:\Program Files (x86)\Steam\steamapps\common\Mechanica"
 }
 
-$CurrentOutDir = Join-Path (Get-Location) "output"
+$OutputDir = Join-Path (Get-Location) "output"
 
 $csproj = Get-ChildItem -Path . -Filter "*.csproj" | Select-Object -First 1 # Get the .csproj file
 if (-not $csproj) { # If no .csproj file is found, exit with an error message
@@ -13,8 +13,8 @@ if (-not $csproj) { # If no .csproj file is found, exit with an error message
 }
 $projName = [System.IO.Path]::GetFileNameWithoutExtension($csproj.Name) # Get the project name from the .csproj file name
 
-$OutputDir = Join-Path (Join-Path (Join-Path (Get-Location) "bin") "Release") "netstandard2.1"
-$OutPutFile = Join-Path $OutputDir "$projName.dll"
+$CurrentOutDir = Join-Path (Join-Path (Join-Path (Get-Location) "bin") "Release") "netstandard2.1"
+$OutPutFile = Join-Path $CurrentOutDir "$projName.dll"
 
 
 # Check if the config file exists, if not, show an error message and the default config content, then exit
@@ -52,13 +52,13 @@ if ($LASTEXITCODE -eq 0) {
     Copy-Item $OutPutFile $pluginsDir -Force
 
     # Check if the copy was successful and also copy to output directory
-    if (!(Test-Path $CurrentOutDir)) { $nul = New-Item $CurrentOutDir -Type Directory };
+    if (!(Test-Path $OutputDir)) { $nul = New-Item $OutputDir -Type Directory };
     
-    Copy-Item $OutPutFile $CurrentOutDir -Force
+    Copy-Item $OutPutFile $OutputDir -Force
 
     if ($?) {
         Write-Host "Build successful and DLL copied to plugins directory -> $pluginsDir" -ForegroundColor Green
-        Write-Host "DLL also copied to output directory -> $outputDir" -ForegroundColor Green
+        Write-Host "DLL also copied to output directory -> $OutputDir" -ForegroundColor Green
     } else {
         Write-Host "Build successful but failed to copy DLL to plugins directory." -ForegroundColor Red
     }
