@@ -57,8 +57,8 @@ if ($LASTEXITCODE -eq 0) {
     Copy-Item $OutPutFile $OutputDir -Force
 
     if ($?) {
-        Write-Host "Build successful and DLL copied to plugins directory -> $pluginsDir" -ForegroundColor Green
-        Write-Host "DLL also copied to output directory -> $OutputDir" -ForegroundColor Green
+        Write-Host "Build successful and DLL copied to plugins directory -> ""$pluginsDir""" -ForegroundColor Green
+        Write-Host "DLL also copied to output directory -> ""$OutputDir""" -ForegroundColor Green
     } else {
         Write-Host "Build successful but failed to copy DLL to plugins directory." -ForegroundColor Red
     }
