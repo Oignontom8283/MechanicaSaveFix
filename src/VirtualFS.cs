@@ -270,6 +270,27 @@ public static class VirtualFS
     }
 
     /// <summary>
+    /// Deletes a file from the virtual file system based on its absolute path without throwing an exception if the file does not exist.
+    /// </summary>
+    /// <param name="absolutePath">The absolute path of the file to delete.</param>
+    public static void DeleteFileNoThrow(string absolutePath)
+    {
+        EnsureInitialized(nameof(DeleteFileNoThrow));
+
+        string relativePath = ToRelativeSaveFilePath(absolutePath);
+        string sanitizedPath = Utils.SanitizePath(relativePath);
+
+        if (_files.Remove(sanitizedPath))
+        {
+            MechanicaSaveFix.Log.LogDebug($"Deleted file from VFS: {sanitizedPath}");
+        }
+        else
+        {
+            MechanicaSaveFix.Log.LogWarning($"VirtualFS.{nameof(DeleteFileNoThrow)}: File not found in virtual file system: {sanitizedPath}");
+        }
+    }
+
+    /// <summary>
     /// Writes a binary file to the virtual file system with the specified content.
     /// </summary>
     /// <param name="absolutePath">The absolute path where the file will be written.</param>
