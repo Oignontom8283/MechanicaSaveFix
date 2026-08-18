@@ -15,7 +15,7 @@ public static class VirtualFS
     /// <remarks>
     /// File paths must be <b>relative to the root</b> save directory <b>AND sanitized</b> (slashes instead of backslashes, no leading slash)!
     /// </remarks>
-    private static readonly Dictionary<string, byte[]> _files = new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase);
+    private static readonly Dictionary<string, byte[]> _files = new Dictionary<string, byte[]>(StringComparer.Ordinal);
 
     /// <summary>
     /// Current mode of the capture/playback system.
