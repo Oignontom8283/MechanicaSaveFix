@@ -329,7 +329,7 @@ public static class VirtualFS
     /// <param name="recursive">Indicates whether to search recursively within subdirectories.</param>
     /// <param name="kind">The type of entries to include in the results.</param>
     /// <returns>An enumerable collection of matching entry paths.</returns>
-    private static IEnumerable<string> QueryEntries(string absoluteDir, string searchPattern, bool recursive, EntryKind kind)
+    public static IEnumerable<string> QueryEntries(string absoluteDir, string searchPattern, bool recursive, EntryKind kind)
     {
         // Normalize target path to the virtual file system's relative format
         string relDir = ToRelativeSaveFilePath(absoluteDir);
