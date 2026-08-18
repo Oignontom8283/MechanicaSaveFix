@@ -82,4 +82,11 @@ public static class Utils
         sb.Append('$');
         return new Regex(sb.ToString(), RegexOptions.Compiled);
     }
+
+    /// <summary>
+    /// Converts a string to a byte array using UTF-8 encoding.
+    /// </summary>
+    /// <param name="text">The UTF-8 string to convert.</param>
+    /// <returns>The resulting byte array.</returns>
+    public static byte[] TextToBytes(string text) => Encoding.UTF8.GetBytes(text);
 }
