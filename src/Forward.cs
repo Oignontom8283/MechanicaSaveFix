@@ -24,4 +24,7 @@ public static class Forward
     public static void WriteAllBytes(string absolutePath, byte[] bytes) =>
         VirtualFS.WriteBinaryFile(absolutePath, bytes);
 
+    public static byte[] ReadAllBytes(string absolutePath) =>
+        VirtualFS.ReadBinaryFile(absolutePath);
+
 }
