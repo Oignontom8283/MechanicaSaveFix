@@ -27,4 +27,7 @@ public static class Forward
     public static byte[] ReadAllBytes(string absolutePath) =>
         VirtualFS.ReadBinaryFile(absolutePath);
 
+    public static void Delete(string absolutePath) =>
+        VirtualFS.DeleteFile(absolutePath);
+
 }
