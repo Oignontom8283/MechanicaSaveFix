@@ -89,4 +89,11 @@ public static class Utils
     /// <param name="text">The UTF-8 string to convert.</param>
     /// <returns>The resulting byte array.</returns>
     public static byte[] TextToBytes(string text) => Encoding.UTF8.GetBytes(text);
+
+    /// <summary>
+    /// Converts a byte array to a string using UTF-8 encoding.
+    /// </summary>
+    /// <param name="bytes">The byte array to convert.</param>
+    /// <returns>The resulting UTF-8 string.</returns>
+    public static string BytesToText(byte[] bytes) => Encoding.UTF8.GetString(bytes);
 }
