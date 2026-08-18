@@ -15,4 +15,7 @@ public static class Forward
     public static bool FileExists(string absolutePath) =>
         VirtualFS.IsExistFile(absolutePath);
 
+    public static void WriteAllText(string absolutePath, string contents) =>
+        VirtualFS.WriteTextFile(absolutePath, contents);
+
 }
