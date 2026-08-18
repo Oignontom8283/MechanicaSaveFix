@@ -56,7 +56,7 @@ public static class Utils
     /// </summary>
     /// <param name="pattern">The wildcard pattern to convert.</param>
     /// <returns>The equivalent regular expression.</returns>
-    public static Regex WildCardToRegex(string pattern)
+    public static Regex WildcardToRegex(string pattern)
     {
         if (string.IsNullOrEmpty(pattern)) pattern = "*";
 
