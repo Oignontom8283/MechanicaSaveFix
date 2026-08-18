@@ -18,4 +18,7 @@ public static class Forward
     public static void WriteAllText(string absolutePath, string contents) =>
         VirtualFS.WriteTextFile(absolutePath, contents);
 
+    public static string ReadAllText(string absolutePath) =>
+        VirtualFS.ReadTextFile(absolutePath);
+
 }
