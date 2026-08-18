@@ -28,7 +28,7 @@ public static class Forward
         VirtualFS.ReadBinaryFile(absolutePath);
 
     public static void Delete(string absolutePath) =>
-        VirtualFS.DeleteFile(absolutePath);
+        VirtualFS.DeleteFileNoThrow(absolutePath); // Delete in System.IO does not throw an exception if the file does not exist, so we use DeleteFileNoThrow to mimic that behavior.
 
 
     // Directory operations
