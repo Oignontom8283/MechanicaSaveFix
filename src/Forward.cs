@@ -70,4 +70,10 @@ public static class Forward
     public static string[] GetFileSystemEntries(string absoluteDir, string searchPattern) =>
         VirtualFS.QueryEntries(absoluteDir, searchPattern, recursive: false, EntryKind.Both).ToArray();
 
+    
+    // Enumerate operations
+
+    public static IEnumerable<string> EnumerateFiles(string absoluteDir) =>
+        VirtualFS.QueryEntries(absoluteDir, "*", recursive: false, EntryKind.Files);
+
 }
