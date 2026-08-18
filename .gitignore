@@ -3,6 +3,6 @@ obj/
 bin/
 Assembly-CSharp/
 log/
-tools.config.json
+*user.json
 *.lnk
 output/
