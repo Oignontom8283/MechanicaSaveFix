@@ -249,6 +249,25 @@ public static class VirtualFS
         return _files.ContainsKey(sanitizedPath);
     }
 
+    /// <summary>
+    /// Deletes a file from the virtual file system based on its absolute path.
+    /// </summary>
+    /// <param name="absolutePath">The absolute path of the file to delete.</param>
+    /// <exception cref="KeyNotFoundException">Thrown when the file is not found in the virtual file system.</exception>
+    public static void DeleteFile(string absolutePath)
+    {
+        EnsureInitialized(nameof(DeleteFile));
+
+        string relativePath = ToRelativeSaveFilePath(absolutePath);
+        string sanitizedPath = Utils.SanitizePath(relativePath);
+
+        if (!_files.Remove(sanitizedPath))
+        {
+            throw new KeyNotFoundException($"VirtualFS.{nameof(DeleteFile)}: File not found in virtual file system: {sanitizedPath}");
+        }
+
+        MechanicaSaveFix.Log.LogDebug($"Deleted file from VFS: {sanitizedPath}");
+    }
 
     /// <summary>
     /// Writes a binary file to the virtual file system with the specified content.
