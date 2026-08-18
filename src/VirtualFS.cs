@@ -254,9 +254,9 @@ public static class VirtualFS
     /// </summary>
     /// <param name="absolutePath">The path where the file will be written.</param>
     /// <param name="content">The content to write to the file.</param>
-    public static void WriteFile(string absolutePath, string content)
+    public static void WriteTextFile(string absolutePath, string content)
     {
-        EnsureInitialized(nameof(WriteFile));
+        EnsureInitialized(nameof(WriteTextFile));
 
         string relativePath = ToRelativeSaveFilePath(absolutePath);
         string sanitizedPath = Utils.SanitizePath(relativePath);
@@ -272,9 +272,9 @@ public static class VirtualFS
     /// <param name="absolutePath">The absolute path of the file to read.</param>
     /// <returns>The content of the file.</returns>
     /// <exception cref="KeyNotFoundException">Thrown when the file is not found in the virtual file system.</exception>
-    public static string ReadFile(string absolutePath)
+    public static string ReadTextFile(string absolutePath)
     {
-        EnsureInitialized(nameof(ReadFile));
+        EnsureInitialized(nameof(ReadTextFile));
 
         string relativePath = ToRelativeSaveFilePath(absolutePath);
         string sanitizedPath = Utils.SanitizePath(relativePath);
