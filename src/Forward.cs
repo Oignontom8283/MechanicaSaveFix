@@ -43,4 +43,10 @@ public static class Forward
     public static string[] GetFiles(string absoluteDir) =>
         VirtualFS.QueryEntries(absoluteDir, "*", recursive: false, EntryKind.Files).ToArray();
 
+    public static string[] GetFiles(string absoluteDir, string searchPattern) =>
+        VirtualFS.QueryEntries(absoluteDir, searchPattern, recursive: false, EntryKind.Files).ToArray();
+
+    public static string[] GetFiles(string absoluteDir, string searchPattern, SearchOption searchOption) =>
+        VirtualFS.QueryEntries(absoluteDir, searchPattern, searchOption == SearchOption.AllDirectories, EntryKind.Files).ToArray();
+
 }
