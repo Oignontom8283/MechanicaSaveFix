@@ -316,9 +316,9 @@ public static class VirtualFS
         string relativePath = ToRelativeSaveFilePath(absolutePath);
         string sanitizedPath = Utils.SanitizePath(relativePath);
 
-        if (!_files.ContainsKey(sanitizedPath))
+        if (!IsExistFile(absolutePath))
         {
-            throw new KeyNotFoundException($"VirtualFS.{nameof(ReadBinaryFile)}: Binary file not found in virtual file system: {sanitizedPath}");
+            throw new KeyNotFoundException($"VirtualFS.{nameof(ReadBinaryFile)}: File not found in virtual file system: {sanitizedPath}");
         }
         return _files[sanitizedPath];
     }
