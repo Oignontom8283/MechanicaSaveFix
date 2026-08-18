@@ -15,7 +15,7 @@ public static class VirtualFS
     /// <remarks>
     /// File paths must be <b>relative to the root</b> save directory <b>AND sanitized</b> (slashes instead of backslashes, no leading slash)!
     /// </remarks>
-    private static readonly Dictionary<string, string> _files = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+    private static readonly Dictionary<string, byte[]> _files = new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// Current mode of the capture/playback system.
@@ -261,7 +261,7 @@ public static class VirtualFS
         string relativePath = ToRelativeSaveFilePath(absolutePath);
         string sanitizedPath = Utils.SanitizePath(relativePath);
 
-        _files.Add(sanitizedPath, content);
+        _files.Add(sanitizedPath, Utils.TextToBytes(content));
 
         MechanicaSaveFix.Log.LogDebug($"File {Utils.GetFastHash(content)} written to VFS: {sanitizedPath}");
     }
@@ -280,7 +280,7 @@ public static class VirtualFS
         string sanitizedPath = Utils.SanitizePath(relativePath);
 
         // Automatically crash if the file doesn't exist in the virtual file system, as this indicates a serious issue with the capture/playback process.
-        return _files[sanitizedPath];
+        return Utils.BytesToText(_files[sanitizedPath]);
     }
 
     /// <summary>
