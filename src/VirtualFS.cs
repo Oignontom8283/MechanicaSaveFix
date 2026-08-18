@@ -62,6 +62,11 @@ public static class VirtualFS
     {
         EnsureInitialized(nameof(Deinitialize));
         
+        if (_mode != Mode.Idle)
+        {
+            throw new InvalidOperationException($"VirtualFS.{nameof(Deinitialize)}: Cannot deinitialize while in {_mode} mode. End the current operation first!");
+        }
+
         _root = null;
         _files.Clear();
 
@@ -176,7 +181,7 @@ public static class VirtualFS
     public static void BeginSaveCapture()
     {
         EnsureInitialized(nameof(BeginSaveCapture));
-        RequiredMod(Mode.Idle, nameof(BeginSaveCapture));
+        RequiredMode(Mode.Idle, nameof(BeginSaveCapture));
         _mode = Mode.Capturing;
         MechanicaSaveFix.Log.LogInfo($"Save capture started in \"{_root}\"!");
     }
@@ -191,7 +196,7 @@ public static class VirtualFS
     public static void BeginLoadPlayback()
     {
         EnsureInitialized(nameof(BeginLoadPlayback));
-        RequiredMod(Mode.Idle, nameof(BeginLoadPlayback));
+        RequiredMode(Mode.Idle, nameof(BeginLoadPlayback));
         _mode = Mode.Playback;
         MechanicaSaveFix.Log.LogInfo($"Save playback started in \"{_root}\"!");
     }
