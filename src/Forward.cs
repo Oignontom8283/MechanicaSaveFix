@@ -30,4 +30,12 @@ public static class Forward
     public static void Delete(string absolutePath) =>
         VirtualFS.DeleteFile(absolutePath);
 
+
+    // Directory operations
+
+    public static bool DirectoryExists(string absoluteDirPath) =>
+        VirtualFS.QueryEntries(absoluteDirPath, "*", recursive: true, EntryKind.Both).Any();
+
+    // CreateDirectory is not implemented because the virtual file system does not support creating directories directly. Instead, directories are created implicitly when files are written to them.
+
 }
