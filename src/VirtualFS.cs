@@ -284,6 +284,26 @@ public static class VirtualFS
     }
 
     /// <summary>
+    /// Reads a binary file from the virtual file system based on its absolute path.
+    /// </summary>
+    /// <param name="absolutePath">The absolute path of the file to read.</param>
+    /// <returns>The content of the file.</returns>
+    /// <exception cref="KeyNotFoundException">Thrown when the file is not found in the virtual file system.</exception>
+    public static byte[] ReadBinaryFile(string absolutePath)
+    {
+        EnsureInitialized(nameof(ReadBinaryFile));
+
+        string relativePath = ToRelativeSaveFilePath(absolutePath);
+        string sanitizedPath = Utils.SanitizePath(relativePath);
+
+        if (!_files.ContainsKey(sanitizedPath))
+        {
+            throw new KeyNotFoundException($"VirtualFS.{nameof(ReadBinaryFile)}: Binary file not found in virtual file system: {sanitizedPath}");
+        }
+        return _files[sanitizedPath];
+    }
+
+    /// <summary>
     /// Queries the virtual file system for entries (files and/or directories) based on the specified parameters.
     /// </summary>
     /// <param name="absoluteDir">The absolute path of the directory to search.</param>
