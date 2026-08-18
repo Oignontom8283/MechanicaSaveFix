@@ -31,16 +31,15 @@ public static class Utils
     public static string SanitizePath(string path) => path.Replace('\\', '/').TrimStart('/');
 
     /// <summary>
-    /// Calculates a fast hash for a given string using the FNV-1a algorithm.
+    /// Calculates a fast hash for a byte array using the FNV-1a algorithm.
     /// </summary>
-    /// <param name="input">The string to hash.</param>
+    /// <param name="bytes">The byte array to hash.</param>
     /// <returns>The calculated hash.</returns>
-    public static string GetFastHash(string input)
+    public static string GetFastHash(byte[] bytes)
     {
-        if (string.IsNullOrEmpty(input)) return "00000000";
+        if (bytes == null || bytes.Length == 0) return "00000000";
 
-        byte[] bytes = Encoding.UTF8.GetBytes(input);
-        uint hash = 2166136261; 
+        uint hash = 2166136261;
 
         foreach (byte b in bytes)
         {
@@ -50,6 +49,16 @@ public static class Utils
 
         return hash.ToString("X8");
     }
+
+    /// <summary>
+    /// Calculates a fast hash for a UTF-8 string using the FNV-1a algorithm.
+    /// </summary>
+    /// <param name="text">The UTF-8 string to hash.</param>
+    /// <returns>The calculated hash.</returns>
+    /// <remarks>
+    /// This method is a wrapper around <see cref="GetFastHash(byte[])"/> that converts the string to a byte array using UTF-8 encoding before hashing.
+    /// </remarks>
+    public static string GetFastHash(string text) => GetFastHash(Encoding.UTF8.GetBytes(text));
 
     /// <summary>
     /// Converts a wildcard pattern (using '*' and '?') into a regular expression for matching file paths.
