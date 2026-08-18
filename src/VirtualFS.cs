@@ -249,39 +249,6 @@ public static class VirtualFS
         return _files.ContainsKey(sanitizedPath);
     }
 
-    /// <summary>
-    /// Writes a file to the virtual file system with the specified content.
-    /// </summary>
-    /// <param name="absolutePath">The path where the file will be written.</param>
-    /// <param name="content">The content to write to the file.</param>
-    public static void WriteTextFile(string absolutePath, string content)
-    {
-        EnsureInitialized(nameof(WriteTextFile));
-
-        string relativePath = ToRelativeSaveFilePath(absolutePath);
-        string sanitizedPath = Utils.SanitizePath(relativePath);
-
-        _files.Add(sanitizedPath, Utils.TextToBytes(content));
-
-        MechanicaSaveFix.Log.LogDebug($"File {Utils.GetFastHash(content)} written to VFS: {sanitizedPath}");
-    }
-
-    /// <summary>
-    /// Reads a file from the virtual file system based on its absolute path.
-    /// </summary>
-    /// <param name="absolutePath">The absolute path of the file to read.</param>
-    /// <returns>The content of the file.</returns>
-    /// <exception cref="KeyNotFoundException">Thrown when the file is not found in the virtual file system.</exception>
-    public static string ReadTextFile(string absolutePath)
-    {
-        EnsureInitialized(nameof(ReadTextFile));
-
-        string relativePath = ToRelativeSaveFilePath(absolutePath);
-        string sanitizedPath = Utils.SanitizePath(relativePath);
-
-        // Automatically crash if the file doesn't exist in the virtual file system, as this indicates a serious issue with the capture/playback process.
-        return Utils.BytesToText(_files[sanitizedPath]);
-    }
 
     /// <summary>
     /// Writes a binary file to the virtual file system with the specified content.
@@ -321,6 +288,34 @@ public static class VirtualFS
             throw new KeyNotFoundException($"VirtualFS.{nameof(ReadBinaryFile)}: File not found in virtual file system: {sanitizedPath}");
         }
         return _files[sanitizedPath];
+    }
+
+    /// <summary>
+    /// Writes a file and converts it to binary format before writing it to the virtual file system with the specified content.
+    /// </summary>
+    /// <param name="absolutePath">The path where the file will be written.</param>
+    /// <param name="textContent">The text content to write to the file.</param>
+    /// <exception cref="InvalidOperationException">Thrown when the file already exists in the virtual file system.</exception>
+    /// <remarks>
+    /// This method converts the text content to a byte array using UTF-8 encoding before writing it to the virtual file system. (Wrapper for <see cref="WriteBinaryFile"/>)
+    /// </remarks>
+    public static void WriteTextFile(string absolutePath, string textContent)
+    {
+        WriteBinaryFile(absolutePath, Utils.TextToBytes(textContent));
+    }
+
+    /// <summary>
+    /// Reads a file and converts it to text from the virtual file system based on its absolute path.
+    /// </summary>
+    /// <param name="absolutePath">The absolute path of the file to read.</param>
+    /// <returns>The content of the file.</returns>
+    /// <exception cref="KeyNotFoundException">Thrown when the file is not found in the virtual file system.</exception>
+    /// <remarks>
+    /// This method reads the binary content of the file and converts it to a string using UTF-8 encoding. (Wrapper for <see cref="ReadBinaryFile"/>)
+    /// </remarks>
+    public static string ReadTextFile(string absolutePath)
+    {
+        return Utils.BytesToText(ReadBinaryFile(absolutePath));
     }
 
     /// <summary>
