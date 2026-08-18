@@ -267,6 +267,8 @@ public static class VirtualFS
         {
             throw new InvalidOperationException($"VirtualFS.{nameof(WriteBinaryFile)}: File already exists in virtual file system: {sanitizedPath}");
         }
+
+        MechanicaSaveFix.Log.LogDebug($"Writing file {Utils.GetFastHash(bytes)} to VFS: {sanitizedPath}");
         _files.Add(sanitizedPath, bytes);
     }
 
@@ -287,7 +289,11 @@ public static class VirtualFS
         {
             throw new KeyNotFoundException($"VirtualFS.{nameof(ReadBinaryFile)}: File not found in virtual file system: {sanitizedPath}");
         }
-        return _files[sanitizedPath];
+
+        byte[] fileContent = _files[sanitizedPath];
+
+        MechanicaSaveFix.Log.LogDebug($"Reading file {Utils.GetFastHash(fileContent)} from VFS: {sanitizedPath}");
+        return fileContent;
     }
 
     /// <summary>
