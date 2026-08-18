@@ -284,6 +284,26 @@ public static class VirtualFS
     }
 
     /// <summary>
+    /// Writes a binary file to the virtual file system with the specified content.
+    /// </summary>
+    /// <param name="absolutePath">The absolute path where the file will be written.</param>
+    /// <param name="bytes">The binary content to write to the file.</param>
+    /// <exception cref="InvalidOperationException">Thrown when a file (binary or text) with the same path already exists in the virtual file system.</exception>
+    public static void WriteBinaryFile(string absolutePath, byte[] bytes)
+    {
+        EnsureInitialized(nameof(WriteBinaryFile));
+
+        string relativePath = ToRelativeSaveFilePath(absolutePath);
+        string sanitizedPath = Utils.SanitizePath(relativePath);
+
+        if (IsExistFile(absolutePath))
+        {
+            throw new InvalidOperationException($"VirtualFS.{nameof(WriteBinaryFile)}: File already exists in virtual file system: {sanitizedPath}");
+        }
+        _files.Add(sanitizedPath, bytes);
+    }
+
+    /// <summary>
     /// Reads a binary file from the virtual file system based on its absolute path.
     /// </summary>
     /// <param name="absolutePath">The absolute path of the file to read.</param>
