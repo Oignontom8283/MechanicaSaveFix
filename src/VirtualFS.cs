@@ -151,6 +151,17 @@ public static class VirtualFS
         IsInitialized() && // Check if the vfs is initialized
         Utils.IsSubPathOf(_root, Path.GetFullPath(absolutePath)); // Check if the absolute path is a subpath of the root directory (file in the save folder).
 
+    /// <summary>
+    /// Converts a relative path to an absolute path based on the save root directory.
+    /// </summary>
+    /// <param name="relativePath">The relative path.</param>
+    /// <returns>The absolute path.</returns>
+    private static string ToAbsoluteFake(string relativePath)
+    {
+        EnsureInitialized(nameof(ToAbsoluteFake));
+
+        return Path.Combine(_root, relativePath);
+    }
 
     // Methods for managing capture and playback operations
 
