@@ -263,7 +263,7 @@ public static class VirtualFS
         string relativePath = ToRelativeSaveFilePath(absolutePath);
         string sanitizedPath = Utils.SanitizePath(relativePath);
 
-        if (IsExistFile(absolutePath))
+        if (_files.ContainsKey(sanitizedPath))
         {
             throw new InvalidOperationException($"VirtualFS.{nameof(WriteBinaryFile)}: File already exists in virtual file system: {sanitizedPath}");
         }
@@ -285,7 +285,7 @@ public static class VirtualFS
         string relativePath = ToRelativeSaveFilePath(absolutePath);
         string sanitizedPath = Utils.SanitizePath(relativePath);
 
-        if (!IsExistFile(absolutePath))
+        if (!_files.ContainsKey(sanitizedPath))
         {
             throw new KeyNotFoundException($"VirtualFS.{nameof(ReadBinaryFile)}: File not found in virtual file system: {sanitizedPath}");
         }
