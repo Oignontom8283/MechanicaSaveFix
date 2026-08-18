@@ -1,9 +1,11 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
+using System.Text.RegularExpressions;
 
 public enum Mode { Idle, Capturing, Playback,  }
+public enum EntryKind { Files, Directories, Both }
+
 
 public static class VirtualFS
 {
@@ -281,20 +283,45 @@ public static class VirtualFS
         return _files[sanitizedPath];
     }
 
-    /// <summary>
-    /// Gets all files in the virtual file system that are located directly within the specified absolute directory.
-    /// </summary>
-    /// <param name="absoluteDir">The absolute path of the directory to search.</param>
-    /// <returns>An array of absolute paths for the files found.</returns>
-    public static string[] GetFilesIn(string absoluteDir)
+    private static IEnumerable<string> QueryEntries(string absoluteDir, string searchPattern, bool recursive, EntryKind kind)
     {
         string relDir = ToRelativeSaveFilePath(absoluteDir);
         string prefix = relDir.Length == 0 ? "" : relDir + "/";
+        Regex regex = Utils.WildcardToRegex(searchPattern);
 
-        return _files.Keys
-            .Where(k => k.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
-                        && k.IndexOf('/', prefix.Length) < 0) // pas de '/' après le préfixe = fichier direct
-            .Select(ToAbsoluteFake)
-            .ToArray();
+        var seenDirs = new HashSet<string>(StringComparer.Ordinal);
+
+        foreach (string key in _files.Keys)
+        {
+            if (!key.StartsWith(prefix, StringComparison.Ordinal))
+                continue;
+
+            string remainder = key.Substring(prefix.Length);
+            int slashIndex = remainder.IndexOf('/');
+            bool isDirectChild = slashIndex < 0;
+
+            if (isDirectChild)
+            {
+                if ((kind == EntryKind.Files || kind == EntryKind.Both) && regex.IsMatch(remainder))
+                    yield return ToAbsoluteFake(key);
+            }
+            else
+            {
+                string immediateSubdir = remainder.Substring(0, slashIndex);
+
+                if (kind == EntryKind.Directories || kind == EntryKind.Both)
+                {
+                    if (seenDirs.Add(immediateSubdir))
+                        yield return ToAbsoluteFake(prefix + immediateSubdir);
+                }
+
+                if (recursive && (kind == EntryKind.Files || kind == EntryKind.Both))
+                {
+                    string fileName = remainder.Substring(remainder.LastIndexOf('/') + 1);
+                    if (regex.IsMatch(fileName))
+                        yield return ToAbsoluteFake(key);
+                }
+            }
+        }
     }
 }
