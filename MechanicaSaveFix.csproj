@@ -12,6 +12,26 @@
     <None Remove="Assembly-CSharp\**" />
   </ItemGroup>
 
+  <!-- Generate build information -->
+  <PropertyGroup>
+    <GeneratedSourceFilePath>obj\BuildInfo.g.cs</GeneratedSourceFilePath>
+  </PropertyGroup>
+  <Target Name="GetGitVersion" BeforeTargets="CoreCompile">
+    <Exec Command="git describe --tags --match &quot;v*.*.*&quot; --always --abbrev=0" ConsoleToMSBuild="true" StandardOutputImportance="low">
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitVersionTag" />
+    </Exec>
+
+    <PropertyGroup>
+      <GitVersionTag>$(GitVersionTag.TrimStart('v'))</GitVersionTag>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Include="$(GeneratedSourceFilePath)" />
+    </ItemGroup>
+
+    <WriteLinesToFile File="$(GeneratedSourceFilePath)" Lines="internal static class BuildInfo { internal const string Version = &quot;$(GitVersionTag)&quot;%3B }" Overwrite="true" WriteOnlyWhenDifferent="true" />
+  </Target>
+
   <ItemGroup>
 
     <Reference Include="HarmonyLib">
