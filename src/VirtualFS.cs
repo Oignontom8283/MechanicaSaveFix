@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using Steamworks;
+using System.IO.Compression;
 
 public enum Mode { Idle, Capturing, Playback,  }
 public enum EntryKind { Files, Directories, Both }
@@ -419,5 +421,31 @@ public static class VirtualFS
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Writes the contents of the virtual file system to a zip archive on disk at the specified path.
+    /// </summary>
+    /// <param name="zipPath"></param>
+    public static void WriteZipToDisk(string zipPath)
+    {
+        EnsureInitialized(nameof(WriteZipToDisk));
+        RequiredMode(Mode.Idle, nameof(WriteZipToDisk));
+        RequireNotEmpty(nameof(WriteZipToDisk));
+
+        using (var zipStream = new FileStream(zipPath, FileMode.Create, FileAccess.Write))
+        using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Create))
+        {
+            foreach (var kvp in _files)
+            {
+                var entry = archive.CreateEntry(kvp.Key, CompressionLevel.Optimal);
+                using (var entryStream = entry.Open())
+                {
+                    entryStream.Write(kvp.Value, 0, kvp.Value.Length);
+                }
+            }
+        }
+
+        MechanicaSaveFix.Log.LogInfo($"VirtualFS: Wrote {_files.Count} files to zip archive at \"{zipPath}\".");
     }
 }
