@@ -426,7 +426,7 @@ public static class VirtualFS
     /// <summary>
     /// Writes the contents of the virtual file system to a zip archive on disk at the specified path.
     /// </summary>
-    /// <param name="zipPath"></param>
+    /// <param name="zipPath">The path where the zip archive will be created.</param>
     public static void WriteZipToDisk(string zipPath)
     {
         EnsureInitialized(nameof(WriteZipToDisk));
@@ -446,7 +446,7 @@ public static class VirtualFS
             }
         }
 
-        MechanicaSaveFix.Log.LogInfo($"VirtualFS: Wrote {_files.Count} files to zip archive at \"{zipPath}\".");
+        MechanicaSaveFix.Log.LogInfo($"Wrote {_files.Count} files to zip archive at \"{zipPath}\".");
     }
 
     /// <summary>
