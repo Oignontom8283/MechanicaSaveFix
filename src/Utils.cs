@@ -105,4 +105,16 @@ public static class Utils
     /// <param name="bytes">The byte array to convert.</param>
     /// <returns>The resulting UTF-8 string.</returns>
     public static string BytesToText(byte[] bytes) => Encoding.UTF8.GetString(bytes);
+
+    /// <summary>
+    /// Verifies if a file exists at the specified absolute path and is not empty.
+    /// </summary>
+    /// <param name="absolutePath">The absolute path to the file.</param>
+    /// <returns><c>true</c> if the file exists and is not empty; otherwise, <c>false</c>.</returns>
+    public static bool VerifyFileValid(string absolutePath)
+    {
+        var info = new FileInfo(absolutePath);
+
+        return info.Exists && info.Length > 0;
+    }
 }
