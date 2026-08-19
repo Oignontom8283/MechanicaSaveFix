@@ -91,7 +91,7 @@ Launch your game normally... There you go (:
 > ## Enables showing a console for log output.
 > # Setting type: Boolean
 > # Default value: false
-> Enabled = true
+> Enabled = true    <-- Here!
 > 
 > ## If enabled, will prevent closing the console (either by deleting the close button or in other platform-specific way).
 > # Setting type: Boolean
