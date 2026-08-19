@@ -17,19 +17,27 @@
     <GeneratedSourceFilePath>obj\BuildInfo.g.cs</GeneratedSourceFilePath>
   </PropertyGroup>
   <Target Name="GetGitVersion" BeforeTargets="CoreCompile">
+    <!-- Get the git tag version -->
     <Exec Command="git describe --tags --match &quot;v*.*.*&quot; --always --abbrev=0" ConsoleToMSBuild="true" StandardOutputImportance="low">
       <Output TaskParameter="ConsoleOutput" PropertyName="GitVersionTag" />
     </Exec>
 
+    <!-- Get the git commit hash -->
+    <Exec Command="git rev-parse HEAD" ConsoleToMSBuild="true" StandardOutputImportance="low">
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitCommitHash" />
+    </Exec>
+
     <PropertyGroup>
-      <GitVersionTag>$(GitVersionTag.TrimStart('v'))</GitVersionTag>
+      <GitVersionTag>$(GitVersionTag.TrimStart('v'))</GitVersionTag> <!-- Remove the leading 'v' from the version tag -->
+      <BuildDateUtc>$([System.DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"))</BuildDateUtc> <!-- Get the build date in UTC -->
     </PropertyGroup>
 
     <ItemGroup>
       <Compile Include="$(GeneratedSourceFilePath)" />
     </ItemGroup>
 
-    <WriteLinesToFile File="$(GeneratedSourceFilePath)" Lines="internal static class BuildInfo { internal const string Version = &quot;$(GitVersionTag)&quot;%3B }" Overwrite="true" WriteOnlyWhenDifferent="true" />
+    <!-- Generate the build information source file -->
+    <WriteLinesToFile File="$(GeneratedSourceFilePath)" Lines="internal static class BuildInfo { internal const string Version = &quot;$(GitVersionTag)&quot;%3B internal const string CommitHash = &quot;$(GitCommitHash)&quot;%3B internal const string BuildDateUtc = &quot;$(BuildDateUtc)&quot;%3B }" Overwrite="true" WriteOnlyWhenDifferent="true" />
   </Target>
 
   <ItemGroup>
