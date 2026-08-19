@@ -448,4 +448,48 @@ public static class VirtualFS
 
         MechanicaSaveFix.Log.LogInfo($"VirtualFS: Wrote {_files.Count} files to zip archive at \"{zipPath}\".");
     }
+
+    /// <summary>
+    /// Loads the contents of a zip archive from disk into the virtual file system.
+    /// </summary>
+    /// <param name="zipPath">The path to the zip archive file.</param>
+    /// <exception cref="FileNotFoundException">Thrown when the specified zip file is not found.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when a duplicate file entry is found in the zip archive.</exception>
+    public static void LoadZipFromDisk(string zipPath)
+    {
+        EnsureInitialized(nameof(LoadZipFromDisk));
+        RequiredMode(Mode.Idle, nameof(LoadZipFromDisk));
+        RequireEmpty(nameof(LoadZipFromDisk));
+
+        if (!File.Exists(zipPath))
+        {
+            throw new FileNotFoundException($"VirtualFS.{nameof(LoadZipFromDisk)}: Zip file not found at \"{zipPath}\".");
+        }
+
+        using (var archive = ZipFile.OpenRead(zipPath))
+        {
+            foreach (ZipArchiveEntry entry in archive.Entries)
+            {
+                if (string.IsNullOrEmpty(entry.Name))
+                {
+                    continue;
+                }
+
+                string sanitizePath = Utils.SanitizePath(entry.FullName);
+
+                using (var entryStream = entry.Open())
+                using (var ms = new MemoryStream())
+                {
+                    entryStream.CopyTo(ms);
+
+                    if (!_files.TryAdd(sanitizePath, ms.ToArray()))
+                    {
+                        throw new InvalidOperationException($"VirtualFS.{nameof(LoadZipFromDisk)}: Duplicate file entry in zip archive: {sanitizePath}");
+                    }
+                }
+            }
+        }
+
+        MechanicaSaveFix.Log.LogInfo($"Loaded {_files.Count} files from zip archive at \"{zipPath}\".");
+    }
 }
