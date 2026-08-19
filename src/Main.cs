@@ -18,7 +18,7 @@ public class MechanicaSaveFix : BaseUnityPlugin
     private void Awake()
     {
         Log = Logger; // Set the logger for this plugin
-        Log.LogInfo($"Mod {MOD_GUID} is loaded!");
+        Log.LogInfo($"{MOD_NAME} ({MOD_GUID}) version {MOD_VERSION} is loaded!");
         
         // Apply Harmony patches
         harmony.PatchAll();
