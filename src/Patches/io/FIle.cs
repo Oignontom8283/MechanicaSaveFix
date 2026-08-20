@@ -24,3 +24,24 @@ public static class Patch_File_Exists
         return false; // Skip the original method
     }
 }
+
+
+[HarmonyPatch]
+public static class Patch_File_WriteAllText
+{
+    public static System.Reflection.MethodBase TargetMethod()
+    {
+        return AccessTools.Method(typeof(File), nameof(File.WriteAllText), new[] { typeof(string), typeof(string) });
+    }
+
+    static bool Prefix(string path, string contents)
+    {
+        if (!VirtualFS.InScope(path))
+        {
+            return true;
+        }
+
+        Forward.WriteAllText(path, contents);
+        return false;
+    }
+}
