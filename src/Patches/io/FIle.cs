@@ -104,3 +104,24 @@ public static class Patch_File_ReadAllBytes
         return false;
     }
 }
+
+
+[HarmonyPatch]
+public static class Patch_File_Delete
+{
+    static System.Reflection.MethodBase TargetMethod()
+    {
+        return AccessTools.Method(typeof(File), nameof(File.Delete), new[] { typeof(string) });
+    }
+
+    static bool Prefix(string path)
+    {
+        if (!VirtualFS.InScope(path))
+        {
+            return true;
+        }
+
+        Forward.Delete(path);
+        return false;
+    }
+}
