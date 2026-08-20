@@ -66,3 +66,20 @@ public static class Patch_File_ReadAllText
         return false;
     }
 }
+
+
+[HarmonyPatch]
+public static class Patch_File_WriteAllBytes
+{
+    static System.Reflection.MethodBase TargetMethod()
+    {
+        return AccessTools.Method(typeof(File), nameof(File.WriteAllBytes), new[] { typeof(string), typeof(byte[]) });
+    }
+
+    static bool Prefix(string path, byte[] bytes)
+    {
+        if (!VirtualFS.InScope(path)) return true;
+        Forward.WriteAllBytes(path, bytes);
+        return false;
+    }
+}
