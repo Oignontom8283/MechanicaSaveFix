@@ -22,4 +22,9 @@ public static class Patch_SaveManager_Save
         VirtualFS.CommitArchive(Path.ChangeExtension(savePath, ".msa"), Path.Combine(savePath, "../../SaveBackups"));
         VirtualFS.Deinitialize();
     }
+
+    static void Postfix(SaveManager __instance, ref IEnumerator __result)
+    {
+        __result = CaptureWrapper(__instance, __result);
+    }
 }
