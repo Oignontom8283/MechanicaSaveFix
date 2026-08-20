@@ -168,3 +168,24 @@ public static class Patch_Directory_GetDirectories_3
         return false;
     }
 }
+
+
+[HarmonyPatch]
+public static class Patch_Directory_GetFileSystemEntries_1
+{
+    static System.Reflection.MethodBase TargetMethod()
+    {
+        return AccessTools.Method(typeof(Directory), nameof(Directory.GetFileSystemEntries), new[] { typeof(string) });
+    }
+
+    static bool Prefix(string path, ref string[] __result)
+    {
+        if (!VirtualFS.InScope(path))
+        {
+            return true;
+        }
+        
+        __result = Forward.GetFileSystemEntries(path);
+        return false;
+    }
+}
