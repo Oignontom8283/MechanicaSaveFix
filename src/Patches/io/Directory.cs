@@ -42,3 +42,24 @@ public static class Patch_Directory_CreateDirectory
         return false; // Skip the original method, as we don't want to create directories in the virtual file system.
     }
 }
+
+
+[HarmonyPatch]
+public static class Patch_Directory_GetFiles_1
+{
+    static System.Reflection.MethodBase TargetMethod()
+    {
+        return AccessTools.Method(typeof(Directory), nameof(Directory.GetFiles), new[] { typeof(string) });
+    }
+
+    static bool Prefix(string path, ref string[] __result)
+    {
+        if (!VirtualFS.InScope(path))
+        {
+            return true;
+        }
+
+        __result = Forward.GetFiles(path);
+        return false;
+    }
+}
