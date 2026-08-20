@@ -1,4 +1,5 @@
 using System.Collections;
+using System.IO;
 using Game.Saving;
 using HarmonyLib;
 
@@ -7,4 +8,18 @@ public static class Patch_SaveManager_Save
 {
     private static readonly AccessTools.FieldRef<SaveManager, string> SavePathRef =
         AccessTools.FieldRefAccess<SaveManager, string>("savePath");
+
+    private static IEnumerator CaptureWrapper(SaveManager instance, IEnumerator original)
+    {
+        string savePath = SavePathRef(instance);
+
+        VirtualFS.Initialize(savePath);
+        VirtualFS.BeginSaveCapture();
+
+        yield return original;
+
+        VirtualFS.EndOperation();
+        VirtualFS.CommitArchive(Path.ChangeExtension(savePath, ".msa"), Path.Combine(savePath, "../../SaveBackups"));
+        VirtualFS.Deinitialize();
+    }
 }
