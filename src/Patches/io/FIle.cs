@@ -83,3 +83,24 @@ public static class Patch_File_WriteAllBytes
         return false;
     }
 }
+
+
+[HarmonyPatch]
+public static class Patch_File_ReadAllBytes
+{
+    static System.Reflection.MethodBase TargetMethod()
+    {
+        return AccessTools.Method(typeof(File), nameof(File.ReadAllBytes), new[] { typeof(string) });
+    }
+
+    static bool Prefix(string path, ref byte[] __result)
+    {
+        if (!VirtualFS.InScope(path))
+        {
+            return true;
+        }
+
+        __result = Forward.ReadAllBytes(path);
+        return false;
+    }
+}
