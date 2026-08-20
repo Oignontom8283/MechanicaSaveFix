@@ -84,3 +84,24 @@ public static class Patch_Directory_GetFiles_2
         return false;
     }
 }
+
+
+[HarmonyPatch]
+public static class Patch_Directory_GetFiles_3
+{
+    static System.Reflection.MethodBase TargetMethod()
+    {
+        return AccessTools.Method(typeof(Directory), nameof(Directory.GetFiles), new[] { typeof(string), typeof(string), typeof(SearchOption) });
+    }
+
+    static bool Prefix(string path, string searchPattern, SearchOption searchOption, ref string[] __result)
+    {
+        if (!VirtualFS.InScope(path))
+        {
+            return true;
+        }
+        
+        __result = Forward.GetFiles(path, searchPattern, searchOption);
+        return false;
+    }
+}
