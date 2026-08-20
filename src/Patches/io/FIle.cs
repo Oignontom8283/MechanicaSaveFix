@@ -45,3 +45,24 @@ public static class Patch_File_WriteAllText
         return false;
     }
 }
+
+
+[HarmonyPatch]
+public static class Patch_File_ReadAllText
+{
+    static System.Reflection.MethodBase TargetMethod()
+    {
+        return AccessTools.Method(typeof(File), nameof(File.ReadAllText), new[] { typeof(string) });
+    }
+
+    static bool Prefix(string path, ref string __result)
+    {
+        if (!VirtualFS.InScope(path))
+        {
+            return true;
+        }
+
+        __result = Forward.ReadAllText(path);
+        return false;
+    }
+}
