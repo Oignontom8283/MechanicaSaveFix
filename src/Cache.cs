@@ -42,5 +42,5 @@ public class CacheSlot<T>
 /// </summary>
 public static class Cache
 {
-    
+    public static CacheSlot<GameSave> SaveInfo = new CacheSlot<GameSave>();
 }
