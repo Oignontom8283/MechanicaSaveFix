@@ -30,7 +30,7 @@ public static class Utils
     /// <remarks>
     /// <b>Necessary for zip file compatibility!</b>
     /// </remarks>
-    public static string SanitizePath(string path) => path.Replace('\\', '/').TrimStart('/');
+    public static string SanitizePath(string path) => Utils.TrimStart(path.Replace('\\', '/'), '/');
 
     /// <summary>
     /// Calculates a fast hash for a byte array using the FNV-1a algorithm.
@@ -202,5 +202,66 @@ public static class Utils
             }
         }
         return result;
+    }
+
+    /// <summary>
+    /// Supprime toutes les occurrences de début d'un jeu de caractères spécifié 
+    /// dans la chaîne de caractères.
+    /// </summary>
+    public static string TrimStart(string str, params char[] trimChars)
+    {
+        if (str == null)
+            throw new ArgumentNullException("str");
+
+        if (str.Length == 0)
+            return str;
+
+        int startIndex = 0;
+
+        // Comportement natif : si trimChars est null ou vide, on trim les espaces blancs
+        if (trimChars == null || trimChars.Length == 0)
+        {
+            while (startIndex < str.Length && char.IsWhiteSpace(str[startIndex]))
+            {
+                startIndex++;
+            }
+        }
+        else
+        {
+            // Recherche des caractères spécifiés
+            while (startIndex < str.Length)
+            {
+                char c = str[startIndex];
+                bool match = false;
+
+                // Boucle for classique pour éviter le boxing d'Array.IndexOf en .NET 1.0
+                for (int i = 0; i < trimChars.Length; i++)
+                {
+                    if (trimChars[i] == c)
+                    {
+                        match = true;
+                        break;
+                    }
+                }
+
+                if (!match)
+                {
+                    // Dès qu'on trouve un caractère qui n'est pas dans trimChars, on s'arrête
+                    break;
+                }
+
+                startIndex++;
+            }
+        }
+
+        // Si rien n'a été retiré, on renvoie la chaîne d'origine pour éviter une allocation
+        if (startIndex == 0)
+            return str;
+
+        // Si toute la chaîne a été retirée
+        if (startIndex == str.Length)
+            return string.Empty;
+
+        return str.Substring(startIndex);
     }
 }
