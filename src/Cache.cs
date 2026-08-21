@@ -3,7 +3,6 @@ using Game.Saving;
 
 /// <summary>
 /// A simple cache slot that can hold a value of type T. It can be used to cache values that are expensive to compute or retrieve.
-/// The cache slot can be set, retrieved, checked for existence, and cleared.
 /// </summary>
 public class CacheSlot<T>
 {
@@ -36,4 +35,12 @@ public class CacheSlot<T>
         _value = default;
         _hasValue = false;
     }
+}
+
+/// <summary>
+///  A static class that holds cache slots for various types of data.
+/// </summary>
+public static class Cache
+{
+    
 }
