@@ -265,4 +265,43 @@ public static class Utils
 
         return str.Substring(startIndex);
     }
+
+    
+    /// <summary>
+    /// Tries to deserialize a JSON string into an object of the specified type.
+    /// </summary>
+    /// <typeparam name="T">The type of object to deserialize.</typeparam>
+    /// <param name="json">The JSON string to deserialize.</param>
+    /// <param name="defaultValue">The default value to return if deserialization fails.</param>
+    /// <returns>The deserialized object, or the default value if deserialization fails.</returns>
+    public static T TryFromJson<T>(string json, T defaultValue = default)
+    {
+        try
+        {
+            return JsonUtility.FromJson<T>(json);
+        }
+        catch
+        {
+            return defaultValue;
+        }
+    }
+
+    /// <summary>
+    /// Tries to deserialize a JSON string into an object of the specified type.
+    /// </summary>
+    /// <typeparam name="T">The type of object to deserialize.</typeparam>
+    /// <param name="json">The JSON string to deserialize.</param>
+    /// <returns>The deserialized object, or the default value if deserialization fails.</returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    public static T FromJsonOrThrow<T>(string json)
+    {
+        try
+        {
+            return JsonUtility.FromJson<T>(json);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Failed to deserialize JSON to type {typeof(T).FullName}.", ex);
+        }
+    }
 }
