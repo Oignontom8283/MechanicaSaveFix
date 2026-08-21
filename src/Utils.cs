@@ -1,3 +1,5 @@
+using System;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -13,7 +15,7 @@ public static class Utils
     /// <returns><c>true</c> if <paramref name="targetPath"/> is inside <paramref name="parentPath"/>; otherwise, <c>false</c>.</returns>
     public static bool IsSubPathOf(string parentPath, string targetPath)
     {
-        string relativePath = Path.GetRelativePath(parentPath, targetPath);
+        string relativePath = GetRelativePath(parentPath, targetPath);
 
         return
             !relativePath.StartsWith("..") && // Ensures path doesn't traverse up out of the parent folder
@@ -116,5 +118,89 @@ public static class Utils
         var info = new FileInfo(absolutePath);
 
         return info.Exists && info.Length > 0;
+    }
+
+    /// <summary>
+    /// Reproduit Path.GetRelativePath(string, string) de .NET Core,
+    /// compatible avec .NET Framework 1.0.
+    /// </summary>
+    public static string GetRelativePath(string relativeTo, string path)
+    {
+        if (relativeTo == null)
+            throw new ArgumentNullException("relativeTo");
+        if (path == null)
+            throw new ArgumentNullException("path");
+        if (relativeTo.Length == 0)
+            throw new ArgumentException("La valeur ne peut pas etre vide.", "relativeTo");
+        if (path.Length == 0)
+            throw new ArgumentException("La valeur ne peut pas etre vide.", "path");
+
+        string fullRelativeTo = Path.GetFullPath(relativeTo);
+        string fullPath = Path.GetFullPath(path);
+
+        string rootRelativeTo = Path.GetPathRoot(fullRelativeTo);
+        string rootPath = Path.GetPathRoot(fullPath);
+
+        if (string.Compare(rootRelativeTo, rootPath, true, CultureInfo.InvariantCulture) != 0)
+        {
+            return fullPath;
+        }
+
+        char[] separators = new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
+
+        string[] splitRelativeTo = fullRelativeTo.Split(separators);
+        string[] splitPath = fullPath.Split(separators);
+
+        splitRelativeTo = RemoveEmptyEntries(splitRelativeTo);
+        splitPath = RemoveEmptyEntries(splitPath);
+
+        int commonLength = 0;
+        int minLength = Math.Min(splitRelativeTo.Length, splitPath.Length);
+
+        while (commonLength < minLength &&
+               string.Compare(splitRelativeTo[commonLength], splitPath[commonLength], true, CultureInfo.InvariantCulture) == 0)
+        {
+            commonLength++;
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = commonLength; i < splitRelativeTo.Length; i++)
+        {
+            if (sb.Length > 0) sb.Append(Path.DirectorySeparatorChar);
+            sb.Append("..");
+        }
+
+        for (int i = commonLength; i < splitPath.Length; i++)
+        {
+            if (sb.Length > 0) sb.Append(Path.DirectorySeparatorChar);
+            sb.Append(splitPath[i]);
+        }
+
+        if (sb.Length == 0)
+            return ".";
+
+        return sb.ToString();
+    }
+
+    private static string[] RemoveEmptyEntries(string[] source)
+    {
+        int count = 0;
+        for (int i = 0; i < source.Length; i++)
+        {
+            if (source[i].Length > 0) count++;
+        }
+
+        string[] result = new string[count];
+        int idx = 0;
+        for (int i = 0; i < source.Length; i++)
+        {
+            if (source[i].Length > 0)
+            {
+                result[idx] = source[i];
+                idx++;
+            }
+        }
+        return result;
     }
 }

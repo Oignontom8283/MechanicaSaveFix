@@ -146,7 +146,7 @@ public static class VirtualFS
     private static string ToRelativeSaveFilePath(string absoluteSaveFilePath)
     {
         EnsureInitialized(nameof(ToRelativeSaveFilePath));
-        return Path.GetRelativePath(_root, absoluteSaveFilePath);
+        return Utils.GetRelativePath(_root, absoluteSaveFilePath);
     }
 
     /// <summary>
