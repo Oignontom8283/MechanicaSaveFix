@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using UnityEngine;
 
 public static class Utils
 {
@@ -121,8 +122,8 @@ public static class Utils
     }
 
     /// <summary>
-    /// Reproduit Path.GetRelativePath(string, string) de .NET Core,
-    /// compatible avec .NET Framework 1.0.
+    /// Reproduces Path.GetRelativePath(string, string) from .NET Core,
+    /// compatible with .NET Framework 1.0.
     /// </summary>
     public static string GetRelativePath(string relativeTo, string path)
     {
@@ -131,9 +132,9 @@ public static class Utils
         if (path == null)
             throw new ArgumentNullException("path");
         if (relativeTo.Length == 0)
-            throw new ArgumentException("La valeur ne peut pas etre vide.", "relativeTo");
+            throw new ArgumentException("The value cannot be empty.", "relativeTo");
         if (path.Length == 0)
-            throw new ArgumentException("La valeur ne peut pas etre vide.", "path");
+            throw new ArgumentException("The value cannot be empty.", "path");
 
         string fullRelativeTo = Path.GetFullPath(relativeTo);
         string fullPath = Path.GetFullPath(path);
@@ -205,8 +206,8 @@ public static class Utils
     }
 
     /// <summary>
-    /// Supprime toutes les occurrences de début d'un jeu de caractères spécifié 
-    /// dans la chaîne de caractères.
+    /// Removes all leading occurrences of a specified set of characters
+    /// from the string.
     /// </summary>
     public static string TrimStart(string str, params char[] trimChars)
     {
@@ -218,7 +219,7 @@ public static class Utils
 
         int startIndex = 0;
 
-        // Comportement natif : si trimChars est null ou vide, on trim les espaces blancs
+        // Native behavior: if trimChars is null or empty, trim whitespace
         if (trimChars == null || trimChars.Length == 0)
         {
             while (startIndex < str.Length && char.IsWhiteSpace(str[startIndex]))
@@ -228,13 +229,13 @@ public static class Utils
         }
         else
         {
-            // Recherche des caractères spécifiés
+            // Search for specified characters
             while (startIndex < str.Length)
             {
                 char c = str[startIndex];
                 bool match = false;
 
-                // Boucle for classique pour éviter le boxing d'Array.IndexOf en .NET 1.0
+                // Classic for loop to avoid Array.IndexOf boxing in .NET 1.0
                 for (int i = 0; i < trimChars.Length; i++)
                 {
                     if (trimChars[i] == c)
@@ -246,7 +247,7 @@ public static class Utils
 
                 if (!match)
                 {
-                    // Dès qu'on trouve un caractère qui n'est pas dans trimChars, on s'arrête
+                    // As soon as we find a character that is not in trimChars, we stop
                     break;
                 }
 
@@ -254,11 +255,11 @@ public static class Utils
             }
         }
 
-        // Si rien n'a été retiré, on renvoie la chaîne d'origine pour éviter une allocation
+        // If nothing was removed, return the original string to avoid an allocation
         if (startIndex == 0)
             return str;
 
-        // Si toute la chaîne a été retirée
+        // If the entire string was removed
         if (startIndex == str.Length)
             return string.Empty;
 
