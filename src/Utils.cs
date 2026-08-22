@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
@@ -302,6 +303,37 @@ public static class Utils
         catch (Exception ex)
         {
             throw new InvalidOperationException($"Failed to deserialize JSON to type {typeof(T).FullName}.", ex);
+        }
+    }
+
+    /// <summary>
+    /// Reads a single file from a zip archive on disk and returns its content as a byte array.
+    /// </summary>
+    /// <param name="zipPath">The path to the zip archive file.</param>
+    /// <param name="entryName">The name of the file entry to read.</param>
+    /// <returns> The content of the file as a byte array, or <c>null</c> if the file is not found.</returns>
+    /// <exception cref="FileNotFoundException">Thrown when the specified zip file is not found.</exception>
+    public static byte[] ReadSingleByteFileFromZip(string zipPath, string entryName)
+    {
+        if (!File.Exists(zipPath))
+        {
+            throw new FileNotFoundException($"${nameof(ReadSingleByteFileFromZip)}: Zip file not found: {zipPath}");
+        }
+
+        string sanitizedEntryName = Utils.SanitizePath(entryName);
+
+        using (var zipStream = new FileStream(zipPath, FileMode.Open, FileAccess.Read))
+        using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Read))
+        {
+            ZipArchiveEntry entry = archive.GetEntry(sanitizedEntryName);
+            if (entry == null) return null;
+            
+            using (var entryStream = entry.Open())
+            using (var ms = new MemoryStream())
+            {
+                entryStream.CopyTo(ms);
+                return ms.ToArray();
+            }
         }
     }
 }
