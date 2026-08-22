@@ -336,4 +336,24 @@ public static class Utils
             }
         }
     }
+
+    /// <summary>
+    /// Reads a single text file from a zip archive on disk and returns its content as a string.
+    /// </summary>
+    /// <param name="zipPath">The path to the zip archive file.</param>
+    /// <param name="entryName">The name of the file entry to read.</param>
+    /// <returns>The content of the file as a string, or <c>null</c> if the file is not found.</returns>
+    public static string ReadSingleTextFileFromZip(string zipPath, string entryName)
+    {
+        byte[] entryBytes = ReadSingleByteFileFromZip(zipPath, entryName);
+
+        if (entryBytes == null)
+        {
+            return null;
+        }
+        else
+        {
+            return BytesToText(entryBytes);
+        }
+    }
 }
