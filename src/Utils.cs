@@ -320,7 +320,7 @@ public static class Utils
             throw new FileNotFoundException($"${nameof(ReadSingleByteFileFromZip)}: Zip file not found: {zipPath}");
         }
 
-        string sanitizedEntryName = Utils.SanitizePath(entryName);
+        string sanitizedEntryName = SanitizePath(entryName);
 
         using (var zipStream = new FileStream(zipPath, FileMode.Open, FileAccess.Read))
         using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Read))
