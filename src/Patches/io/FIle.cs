@@ -1,5 +1,6 @@
 using System.IO;
 using HarmonyLib;
+using UnityEngine;
 
 
 [HarmonyPatch]
@@ -62,7 +63,16 @@ public static class Patch_File_ReadAllText
             return true;
         }
 
-        __result = Forward.ReadAllText(path);
+        if (Path.GetFileName(path) == "saveinfo.txt")
+        {   
+            MechanicaSaveFix.Log.LogInfo($"SaveInfo Intercepted: {path}");
+            __result = JsonUtility.ToJson(Cache.SaveInfo.Get(), true);
+        }
+        else
+        {
+            __result = Forward.ReadAllText(path);
+        }
+
         return false;
     }
 }
