@@ -320,7 +320,7 @@ public static class VirtualFS
     /// </summary>
     /// <param name="absolutePath">The absolute path of the file to read.</param>
     /// <returns>The content of the file.</returns>
-    /// <exception cref="KeyNotFoundException">Thrown when the file is not found in the virtual file system.</exception>
+    /// <exception cref="FileNotFoundException">Thrown when the file is not found in the virtual file system.</exception>
     public static byte[] ReadBinaryFile(string absolutePath)
     {
         EnsureInitialized(nameof(ReadBinaryFile));
@@ -328,12 +328,15 @@ public static class VirtualFS
         string relativePath = ToRelativeSaveFilePath(absolutePath);
         string sanitizedPath = Utils.SanitizePath(relativePath);
 
-        if (!_files.TryGetValue(sanitizedPath, out byte[] fileContent))
+        if (_files.TryGetValue(sanitizedPath, out byte[] fileContent))
         {
-            throw new KeyNotFoundException($"VirtualFS.{nameof(ReadBinaryFile)}: File not found in virtual file system: {sanitizedPath}");
+            MechanicaSaveFix.Log.LogDebug($"Reading file \"{sanitizedPath}\" from VFS. Content FNV-1a hash: {(fileContent.Length > 0 ? Utils.GetFastHash(fileContent) : "N/A")}.");
+        }
+        else
+        {
+            throw new FileNotFoundException($"VirtualFS.{nameof(ReadBinaryFile)}: File not found in virtual file system: {sanitizedPath}");
         }
 
-        MechanicaSaveFix.Log.LogDebug($"Reading file {Utils.GetFastHash(fileContent)} from VFS: {sanitizedPath}");
         return fileContent;
     }
 
@@ -353,10 +356,7 @@ public static class VirtualFS
     /// </summary>
     /// <param name="absolutePath">The absolute path of the file to read.</param>
     /// <returns>The content of the file.</returns>
-    /// <exception cref="KeyNotFoundException">Thrown when the file is not found in the virtual file system.</exception>
-    /// <remarks>
-    /// This method reads the binary content of the file and converts it to a string using UTF-8 encoding. (Wrapper for <see cref="ReadBinaryFile"/>)
-    /// </remarks>
+    /// <exception cref="FileNotFoundException">Thrown when the file is not found in the virtual file system.</exception>
     public static string ReadTextFile(string absolutePath)
     {
         return Utils.BytesToText(ReadBinaryFile(absolutePath));
