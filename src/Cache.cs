@@ -30,6 +30,8 @@ public class CacheSlot<T>
 
     public bool IsNull() => !_hasValue;
 
+    public bool IsSet() => _hasValue;
+
     public void Clear()
     {
         _value = default;
