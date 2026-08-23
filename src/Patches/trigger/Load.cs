@@ -1,11 +1,8 @@
-using System;
 using System.Collections;
 using System.IO;
-using System.Reflection;
 using Game.Saving;
 using HarmonyLib;
-using UnityEngine;
-using UnityEngine.PlayerLoop;
+
 
 [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.LoadSave))]
 public static class Patch_SaveManager_LoadSave
@@ -28,38 +25,18 @@ public static class Patch_SaveManager_LoadSave
         {
             MechanicaSaveFix.Log.LogInfo($"No save archive found at {saveArchivePath}");
         }
-
-        // // Load the saveInfo from the appropriate source (archive or folder)
-        // GameSave saveInfo = ((Func<GameSave>)(() =>
-        // {
-        //     if (!isExistArchive)
-        //     {
-        //         string saveInfoPath = Path.Combine(saveFolderPath, "saveInfo.txt");
-        //         string saveInfoText = File.ReadAllText(saveInfoPath);
-        //         return Utils.FromJsonOrThrow<GameSave>(saveInfoText);
-        //     }
-        //     else
-        //     {
-        //         string saveInfoText = Utils.ReadSingleTextFileFromZip(saveArchivePath, "saveInfo.txt"); // TODO: Ajouter un throw si le fichier n'existe pas dans l'archive ou une fonction
-        //         return Utils.FromJsonOrThrow<GameSave>(saveInfoText);
-        //     }
-        // }))();
-
-        // // Store the loaded saveInfo in the cache for save use
-        // Cache.SaveInfo.Set(saveInfo);
-
     }
 }
 
 [HarmonyPatch]
-public static class patch_SaveManager_FinalizeLoad
+public static class Patch_SaveManager_FinalizeLoad
 {
-    static MethodBase TargetMethod()
+    static System.Reflection.MethodBase TargetMethod()
     {
         return AccessTools.Method(typeof(SaveManager), "FinalizeLoad", new[] { typeof(ulong) });
     }
 
-    private static IEnumerator EndLoadWrapper(IEnumerator original)
+    private static IEnumerator PlaybackWrapper(IEnumerator original)
     {
         yield return original;
 
@@ -73,6 +50,6 @@ public static class patch_SaveManager_FinalizeLoad
 
     static void Postfix(ref IEnumerator __result)
     {
-        __result = EndLoadWrapper(__result);
+        __result = PlaybackWrapper(__result);
     }
 }
