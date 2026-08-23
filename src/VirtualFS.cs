@@ -375,6 +375,8 @@ public static class VirtualFS
     {
         // Normalize target path to the virtual file system's relative format
         string relDir = ToRelativeSaveFilePath(absoluteDir);
+        // GetRelativePath returns "." when both paths are identical (root case).
+        if (relDir == ".") relDir = string.Empty;
         // Ensure trailing slash for prefix matching unless targeting root
         string prefix = relDir.Length == 0 ? "" : relDir + "/";
         // Convert wildcard pattern (*, ?) into an executable Regex
