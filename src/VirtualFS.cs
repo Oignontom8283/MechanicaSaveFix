@@ -298,20 +298,21 @@ public static class VirtualFS
     /// </summary>
     /// <param name="absolutePath">The absolute path where the file will be written.</param>
     /// <param name="bytes">The binary content to write to the file.</param>
-    /// <exception cref="InvalidOperationException">Thrown when a file (binary or text) with the same path already exists in the virtual file system.</exception>
-    public static void WriteBinaryFile(string absolutePath, byte[] bytes)
+    /// <returns><c>true</c> if the file was replaced; otherwise, <c>false</c>.</returns>
+    public static bool WriteBinaryFile(string absolutePath, byte[] bytes)
     {
         EnsureInitialized(nameof(WriteBinaryFile));
 
         string relativePath = ToRelativeSaveFilePath(absolutePath);
         string sanitizedPath = Utils.SanitizePath(relativePath);
 
-        if (!_files.TryAdd(sanitizedPath, bytes))
-        {
-            throw new InvalidOperationException($"VirtualFS.{nameof(WriteBinaryFile)}: File already exists in virtual file system: {sanitizedPath}");
-        }
+        bool IsReplace = _files.ContainsKey(sanitizedPath);
 
-        MechanicaSaveFix.Log.LogDebug($"Writing file {Utils.GetFastHash(bytes)} to VFS: {sanitizedPath}");
+        _files[sanitizedPath] = bytes;
+
+        MechanicaSaveFix.Log.LogDebug($"Writing file \"{sanitizedPath}\" to VFS. Replaced: {IsReplace}. Content FNV-1a hash: {Utils.GetFastHash(bytes)}.");
+
+        return IsReplace;
     }
 
     /// <summary>
@@ -341,13 +342,10 @@ public static class VirtualFS
     /// </summary>
     /// <param name="absolutePath">The path where the file will be written.</param>
     /// <param name="textContent">The text content to write to the file.</param>
-    /// <exception cref="InvalidOperationException">Thrown when the file already exists in the virtual file system.</exception>
-    /// <remarks>
-    /// This method converts the text content to a byte array using UTF-8 encoding before writing it to the virtual file system. (Wrapper for <see cref="WriteBinaryFile"/>)
-    /// </remarks>
-    public static void WriteTextFile(string absolutePath, string textContent)
+    /// <returns><c>true</c> if the file was replaced; otherwise, <c>false</c>.</returns>
+    public static bool WriteTextFile(string absolutePath, string textContent)
     {
-        WriteBinaryFile(absolutePath, Utils.TextToBytes(textContent));
+        return WriteBinaryFile(absolutePath, Utils.TextToBytes(textContent));
     }
 
     /// <summary>
