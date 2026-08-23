@@ -15,16 +15,21 @@ public static class Patch_SaveManager_LoadSave
 
         VirtualFS.Initialize(saveFolderPath);
 
+        MechanicaSaveFix.Log.LogInfo($"Save archive at {saveArchivePath} exists: {isExistArchive}");
         if (isExistArchive)
         {
+            MechanicaSaveFix.Log.LogInfo($"Loading save archive.");
             VirtualFS.LoadZipFromDisk(saveArchivePath);
-            MechanicaSaveFix.Log.LogInfo($"Loaded save archive from {saveArchivePath}");
-            VirtualFS.BeginLoadPlayback();
         }
         else
         {
-            MechanicaSaveFix.Log.LogInfo($"No save archive found at {saveArchivePath}");
+            MechanicaSaveFix.Log.LogInfo($"Loading save folder.");
+            VirtualFS.LoadFolderFromDisk(saveFolderPath);
         }
+
+        // PLayback the world
+        MechanicaSaveFix.Log.LogInfo($"Starting world load playback.");
+        VirtualFS.BeginLoadPlayback();
     }
 }
 
@@ -44,7 +49,7 @@ public static class Patch_SaveManager_FinalizeLoad
         if (VirtualFS.IsOperationActive())
         {   
             VirtualFS.EndOperation();
-            MechanicaSaveFix.Log.LogInfo("Ended of world load playback operation.");
+            MechanicaSaveFix.Log.LogInfo("World load playback finished.");
         }
     }
 
