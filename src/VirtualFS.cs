@@ -159,6 +159,7 @@ public static class VirtualFS
     /// </remarks>
     public static bool InScope(string absolutePath) =>
         IsInitialized() && // Check if the vfs is initialized
+        _mode != Mode.Idle && // Check if the vfs is in capturing or playback mode
         Utils.IsSubPathOf(_root, Path.GetFullPath(absolutePath)); // Check if the absolute path is a subpath of the root directory (file in the save folder).
 
     /// <summary>
