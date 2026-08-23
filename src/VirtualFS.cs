@@ -497,6 +497,46 @@ public static class VirtualFS
     }
 
     /// <summary>
+    /// Loads the contents of a folder from disk into the virtual file system, preserving the directory structure.
+    /// </summary>
+    /// <param name="folderPath">The path to the folder to load.</param>
+    /// <exception cref="DirectoryNotFoundException">Thrown when the specified folder is not found.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when a duplicate file entry is found in the folder.</exception>
+    public static void LoadFolderFromDisk(string folderPath)
+    {
+        EnsureInitialized(nameof(LoadFolderFromDisk));
+        RequiredMode(Mode.Idle, nameof(LoadFolderFromDisk));
+        RequireEmpty(nameof(LoadFolderFromDisk));
+
+        var sourceDir = new DirectoryInfo(folderPath);
+        if (!sourceDir.Exists)
+        {
+            throw new DirectoryNotFoundException($"VirtualFS.{nameof(LoadFolderFromDisk)}: Folder not found at \"{folderPath}\".");
+        }
+
+        foreach (FileInfo file in sourceDir.EnumerateFiles("*", SearchOption.AllDirectories))
+        {
+            string relativePath = Utils.GetRelativePath(folderPath, file.FullName);
+            string sanitizedPath = Utils.SanitizePath(relativePath);
+
+            byte[] bytes;
+            using (var stream = file.OpenRead())
+            using (var ms = new MemoryStream())
+            {
+                stream.CopyTo(ms);
+                bytes = ms.ToArray();
+            }
+
+            if (!_files.TryAdd(sanitizedPath, bytes))
+            {
+                throw new InvalidOperationException($"VirtualFS.{nameof(LoadFolderFromDisk)}: Duplicate file entry: {sanitizedPath}");
+            }
+        }
+
+        MechanicaSaveFix.Log.LogInfo($"Loaded {_files.Count} files from folder at \"{folderPath}\".");
+    }
+
+    /// <summary>
     /// Save the current virtual file system to a zip archive on disk, creating a backup of the existing archive if it exists.
     /// </summary>
     /// <param name="finalZipPath">The path to the final zip archive file.</param>
