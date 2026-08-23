@@ -42,3 +42,29 @@ public static class Patch_SaveManager_LoadSave
 
     }
 }
+
+[HarmonyPatch]
+public static class patch_SaveManager_FinalizeLoad
+{
+    static MethodBase TargetMethod()
+    {
+        return AccessTools.Method(typeof(SaveManager), "FinalizeLoad", new[] { typeof(ulong) });
+    }
+
+    private static IEnumerator EndLoadWrapper(IEnumerator original)
+    {
+        yield return original;
+
+        // If the world is an archive, then we are in playback mode, so we need to end the playback operation.
+        if (VirtualFS.IsOperationActive())
+        {   
+            VirtualFS.EndOperation();
+            MechanicaSaveFix.Log.LogInfo("Ended of world load playback operation.");
+        }
+    }
+
+    static void Postfix(ref IEnumerator __result)
+    {
+        __result = EndLoadWrapper(__result);
+    }
+}
