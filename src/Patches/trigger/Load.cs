@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.IO;
+using System.Reflection;
 using Game.Saving;
 using HarmonyLib;
 using UnityEngine;
@@ -17,9 +18,16 @@ public static class Patch_SaveManager_LoadSave
 
         VirtualFS.Initialize(saveFolderPath);
 
-        VirtualFS.LoadZipFromDisk(saveArchivePath);
-
-        VirtualFS.BeginLoadPlayback();
+        if (isExistArchive)
+        {
+            VirtualFS.LoadZipFromDisk(saveArchivePath);
+            MechanicaSaveFix.Log.LogInfo($"Loaded save archive from {saveArchivePath}");
+            VirtualFS.BeginLoadPlayback();
+        }
+        else
+        {
+            MechanicaSaveFix.Log.LogInfo($"No save archive found at {saveArchivePath}");
+        }
 
         // // Load the saveInfo from the appropriate source (archive or folder)
         // GameSave saveInfo = ((Func<GameSave>)(() =>
