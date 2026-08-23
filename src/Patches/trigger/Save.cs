@@ -13,14 +13,17 @@ public static class Patch_SaveManager_Save
     {
         string savePath = SavePathRef(instance);
 
-        VirtualFS.Initialize(savePath);
+        if (!VirtualFS.IsInitialized())
+        {
+            throw new System.Exception("VirtualFS is not initialized.");
+        }
+        
         VirtualFS.BeginSaveCapture();
 
         yield return original;
 
         VirtualFS.EndOperation();
         VirtualFS.CommitArchive(Path.ChangeExtension(savePath, ".msa"), Path.Combine(savePath, "../../SaveBackups"));
-        VirtualFS.Deinitialize();
     }
 
     static void Postfix(SaveManager __instance, ref IEnumerator __result)
