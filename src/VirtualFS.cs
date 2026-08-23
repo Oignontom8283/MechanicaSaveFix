@@ -256,41 +256,19 @@ public static class VirtualFS
     /// Deletes a file from the virtual file system based on its absolute path.
     /// </summary>
     /// <param name="absolutePath">The absolute path of the file to delete.</param>
-    /// <exception cref="KeyNotFoundException">Thrown when the file is not found in the virtual file system.</exception>
-    public static void DeleteFile(string absolutePath)
+    /// <returns><c>true</c> if the file was deleted; otherwise, <c>false</c>.</returns>
+    public static bool DeleteFile(string absolutePath)
     {
         EnsureInitialized(nameof(DeleteFile));
 
         string relativePath = ToRelativeSaveFilePath(absolutePath);
         string sanitizedPath = Utils.SanitizePath(relativePath);
 
-        if (!_files.Remove(sanitizedPath))
-        {
-            throw new KeyNotFoundException($"VirtualFS.{nameof(DeleteFile)}: File not found in virtual file system: {sanitizedPath}");
-        }
+        bool fileExisted = _files.Remove(sanitizedPath);
 
-        MechanicaSaveFix.Log.LogDebug($"Deleted file from VFS: {sanitizedPath}");
-    }
+        MechanicaSaveFix.Log.LogDebug($"Deleted file from VFS: {sanitizedPath}. Existed: {fileExisted}.");
 
-    /// <summary>
-    /// Deletes a file from the virtual file system based on its absolute path without throwing an exception if the file does not exist.
-    /// </summary>
-    /// <param name="absolutePath">The absolute path of the file to delete.</param>
-    public static void DeleteFileNoThrow(string absolutePath)
-    {
-        EnsureInitialized(nameof(DeleteFileNoThrow));
-
-        string relativePath = ToRelativeSaveFilePath(absolutePath);
-        string sanitizedPath = Utils.SanitizePath(relativePath);
-
-        if (_files.Remove(sanitizedPath))
-        {
-            MechanicaSaveFix.Log.LogDebug($"Deleted file from VFS: {sanitizedPath}");
-        }
-        else
-        {
-            MechanicaSaveFix.Log.LogWarning($"VirtualFS.{nameof(DeleteFileNoThrow)}: File not found in virtual file system: {sanitizedPath}");
-        }
+        return fileExisted;
     }
 
     /// <summary>
