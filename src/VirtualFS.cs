@@ -203,7 +203,7 @@ public static class VirtualFS
         EnsureInitialized(nameof(BeginLoadPlayback));
         RequiredMode(Mode.Idle, nameof(BeginLoadPlayback));
         _mode = Mode.Playback;
-        MechanicaSaveFix.Log.LogInfo($"Save playback started in \"{_root}\"!");
+        MechanicaSaveFix.Log.LogDebug($"Save playback started in \"{_root}\"!");
     }
 
     /// <summary>
@@ -229,7 +229,7 @@ public static class VirtualFS
         }
 
         _mode = Mode.Idle;
-        MechanicaSaveFix.Log.LogInfo($"Operation (capture/playback) ended. Current mode is now {_mode}.");
+        MechanicaSaveFix.Log.LogDebug($"Operation (capture/playback) ended. Current mode is now {_mode}.");
     }
 
 
