@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using Steamworks;
 using System.IO.Compression;
+
 
 public enum Mode { Idle, Capturing, Playback,  }
 public enum EntryKind { Files, Directories, Both }
@@ -503,10 +503,7 @@ public static class VirtualFS
                 bytes = ms.ToArray();
             }
 
-            if (!_files.TryAdd(sanitizedPath, bytes))
-            {
-                throw new InvalidOperationException($"VirtualFS.{nameof(LoadFolderFromDisk)}: Duplicate file entry: {sanitizedPath}");
-            }
+            _files[sanitizedPath] = bytes;
         }
 
         MechanicaSaveFix.Log.LogInfo($"Loaded {_files.Count} files from folder at \"{folderPath}\".");
