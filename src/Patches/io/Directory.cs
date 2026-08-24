@@ -43,6 +43,47 @@ public static class Patch_Directory_CreateDirectory
     }
 }
 
+[HarmonyPatch]
+public static class Patch_Directory_Delete_1
+{
+    static System.Reflection.MethodBase TargetMethod()
+    {
+        return AccessTools.Method(typeof(Directory), nameof(Directory.Delete), new[] { typeof(string) });
+    }
+
+    static bool Prefix(string path)
+    {
+        if (!VirtualFS.InScope(path))
+        {
+            return true;
+        }
+
+        Forward.DeleteDirectory(path, recursive: false);
+        return false;
+    }
+}
+
+
+[HarmonyPatch]
+public static class Patch_Directory_Delete_2
+{
+    static System.Reflection.MethodBase TargetMethod()
+    {
+        return AccessTools.Method(typeof(Directory), nameof(Directory.Delete), new[] { typeof(string), typeof(bool) });
+    }
+
+    static bool Prefix(string path, bool recursive)
+    {
+        if (!VirtualFS.InScope(path))
+        {
+            return true;
+        }
+
+        Forward.DeleteDirectory(path, recursive);
+        return false;
+    }
+}
+
 
 [HarmonyPatch]
 public static class Patch_Directory_GetFiles_1
