@@ -403,6 +403,53 @@ public static class VirtualFS
     }
 
     /// <summary>
+    /// Deletes a directory from the virtual file system based on its absolute path, removing
+    /// all files found under it. Mimics System.IO.Directory.Delete behavior: throws
+    /// DirectoryNotFoundException if the directory doesn't exist (has no files under it),
+    /// and throws IOException if recursive is false but the directory is not empty.
+    /// </summary>
+    /// <param name="absolutePath">The absolute path of the directory to delete.</param>
+    /// <param name="recursive"><c>true</c> to remove the directory and everything inside it; <c>false</c> to only remove it if empty.</param>
+    /// <exception cref="DirectoryNotFoundException">Thrown when the directory does not exist in the virtual file system.</exception>
+    /// <exception cref="IOException">Thrown when <paramref name="recursive"/> is <c>false</c> and the directory is not empty.</exception>
+    public static void DeleteDirectory(string absolutePath, bool recursive)
+    {
+        EnsureInitialized(nameof(DeleteDirectory));
+
+        string relDir = ToRelativeSaveFilePath(absolutePath);
+        if (relDir == ".") relDir = string.Empty;
+        string prefix = relDir.Length == 0 ? "" : relDir + "/";
+
+        // Un dossier n'existe, dans ce VFS, que s'il contient au moins un fichier
+        // (les dossiers vides ne sont jamais représentés dans _files).
+        var matchingKeys = new List<string>();
+        foreach (string key in _files.Keys)
+        {
+            if (key.StartsWith(prefix, StringComparison.Ordinal))
+                matchingKeys.Add(key);
+        }
+
+        if (matchingKeys.Count == 0)
+        {
+            throw new DirectoryNotFoundException(
+                $"VirtualFS.{nameof(DeleteDirectory)}: Directory not found in virtual file system: {relDir}");
+        }
+
+        if (!recursive)
+        {
+            throw new IOException(
+                $"VirtualFS.{nameof(DeleteDirectory)}: Directory is not empty (recursive=false): {relDir}");
+        }
+
+        foreach (string key in matchingKeys)
+        {
+            _files.Remove(key);
+        }
+
+        MechanicaSaveFix.Log.LogDebug($"Deleted directory and {matchingKeys.Count} file(s) from VFS: {relDir}");
+    }
+
+    /// <summary>
     /// Writes the contents of the virtual file system to a zip archive on disk at the specified path.
     /// </summary>
     /// <param name="zipPath">The path where the zip archive will be created.</param>
