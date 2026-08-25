@@ -19,11 +19,16 @@ public static class Patch_SaveManager_Save
         }
         
         VirtualFS.BeginSaveCapture();
+        MechanicaSaveFix.Log.LogInfo($"Starting save capture.");
 
         yield return original;
 
         VirtualFS.EndOperation();
+        MechanicaSaveFix.Log.LogInfo($"Save capture finished.");
+
+        MechanicaSaveFix.Log.LogInfo($"Committing save archive to disk...");
         VirtualFS.CommitArchive(Path.ChangeExtension(savePath, ".msa"), Path.Combine(savePath, "../../SaveBackups"));
+        MechanicaSaveFix.Log.LogInfo($"Save archive committed to disk at {Path.ChangeExtension(savePath, ".msa")}.");
     }
 
     static void Postfix(SaveManager __instance, ref IEnumerator __result)

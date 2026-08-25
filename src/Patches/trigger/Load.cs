@@ -18,14 +18,15 @@ public static class Patch_SaveManager_LoadSave
         MechanicaSaveFix.Log.LogInfo($"Save archive at {saveArchivePath} exists: {isExistArchive}");
         if (isExistArchive)
         {
-            MechanicaSaveFix.Log.LogInfo($"Loading save archive.");
+            MechanicaSaveFix.Log.LogInfo($"Loading save archive...");
             VirtualFS.LoadZipFromDisk(saveArchivePath);
         }
         else
         {
-            MechanicaSaveFix.Log.LogInfo($"Loading save folder.");
+            MechanicaSaveFix.Log.LogInfo($"Loading save folder...");
             VirtualFS.LoadFolderFromDisk(saveFolderPath);
         }
+        MechanicaSaveFix.Log.LogInfo($"Save load finished.");
 
         // PLayback the world
         MechanicaSaveFix.Log.LogInfo($"Starting world load playback.");
