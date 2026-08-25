@@ -34,7 +34,7 @@ public static class Forward
     // Directory operations
 
     public static bool DirectoryExists(string absoluteDirPath) =>
-        VirtualFS.QueryEntries(absoluteDirPath, "*", recursive: true, EntryKind.Both).Any();
+        true;
 
     // CreateDirectory is not implemented because the virtual file system does not support creating directories directly. Instead, directories are created implicitly when files are written to them.
 
