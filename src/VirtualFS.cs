@@ -171,7 +171,8 @@ public static class VirtualFS
     {
         EnsureInitialized(nameof(ToAbsoluteFake));
 
-        return Path.Combine(_root, relativePath);
+        string nativeRelative = relativePath.Replace('/', Path.DirectorySeparatorChar);
+        return Path.Combine(_root, nativeRelative);
     }
 
     // Methods for managing capture and playback operations
