@@ -14,8 +14,11 @@ public static class Patch_SaveManager_LoadSave
         bool isExistArchive = File.Exists(saveArchivePath);
 
         VirtualFS.Initialize(saveFolderPath);
-
-        MechanicaSaveFix.Log.LogInfo($"Save archive at {saveArchivePath} exists: {isExistArchive}");
+        MechanicaSaveFix.Log.LogMessage($"VirtualFS initialized!");
+        
+        MechanicaSaveFix.Log.LogInfo($"Save root path: {saveFolderPath}");
+        MechanicaSaveFix.Log.LogInfo($"Save archive finded? ${isExistArchive} at \"{saveArchivePath}\".");
+        
         int loadedFiles = 0;
         if (isExistArchive)
         {
@@ -27,11 +30,11 @@ public static class Patch_SaveManager_LoadSave
             MechanicaSaveFix.Log.LogInfo($"Loading save folder...");
             loadedFiles = VirtualFS.LoadFolderFromDisk(saveFolderPath);
         }
-        MechanicaSaveFix.Log.LogInfo($"Finished loading {loadedFiles} files.");
+        MechanicaSaveFix.Log.LogMessage($"Finished loading {loadedFiles} files.");
 
         // PLayback the world
-        MechanicaSaveFix.Log.LogInfo($"Starting world load playback.");
-        VirtualFS.BeginLoadPlayback();
+        VirtualFS.StartIntercepting();
+        MechanicaSaveFix.Log.LogInfo($"Start world I/O intercepting.");
     }
 }
 
@@ -50,8 +53,8 @@ public static class Patch_SaveManager_FinalizeLoad
         // If the world is an archive, then we are in playback mode, so we need to end the playback operation.
         if (VirtualFS.IsOperationActive())
         {   
-            VirtualFS.EndOperation();
-            MechanicaSaveFix.Log.LogInfo("World load playback finished.");
+            VirtualFS.EndIntercepting();
+            MechanicaSaveFix.Log.LogMessage("World loading I/O intercepting finished.");
         }
     }
 

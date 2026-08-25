@@ -13,22 +13,26 @@ public static class Patch_SaveManager_Save
     {
         string savePath = SavePathRef(instance);
 
+        string saveArchivePath = Path.ChangeExtension(savePath, ".msa");
+        string saveBackupPath = Path.Combine(savePath, "../../SaveBackups");
+
         if (!VirtualFS.IsInitialized())
         {
             throw new System.Exception("VirtualFS is not initialized.");
         }
         
-        VirtualFS.BeginSaveCapture();
-        MechanicaSaveFix.Log.LogInfo($"Starting save capture.");
+        VirtualFS.StartIntercepting();
+        MechanicaSaveFix.Log.LogMessage($"Starting world I/O intercepting.");
 
         yield return original;
 
-        VirtualFS.EndOperation();
-        MechanicaSaveFix.Log.LogInfo($"Save capture finished.");
+        VirtualFS.EndIntercepting();
+        MechanicaSaveFix.Log.LogMessage($"World I/O intercepting finished.");
 
-        MechanicaSaveFix.Log.LogInfo($"Committing save archive to disk...");
-        var commitedResult = VirtualFS.CommitArchive(Path.ChangeExtension(savePath, ".msa"), Path.Combine(savePath, "../../SaveBackups"));
-        MechanicaSaveFix.Log.LogInfo($"Finished committing {commitedResult.committedFiles} files to save archive at \"{Path.ChangeExtension(savePath, ".msa")}\".");
+        MechanicaSaveFix.Log.LogInfo($"Saving world archive to disk...");
+        var commitedResult = VirtualFS.CommitArchive(saveArchivePath, saveBackupPath);
+        MechanicaSaveFix.Log.LogMessage($"Finished saving {commitedResult.committedFiles} files to archive!");
+        MechanicaSaveFix.Log.LogInfo($"Archive saved to \"{(commitedResult.backupCreated ? saveArchivePath : "N/A")}\". Backup saved to \"{(commitedResult.oldBackupDeleted ? saveBackupPath : "N/A")}\".");
     }
 
     static void Postfix(SaveManager __instance, ref IEnumerator __result)
