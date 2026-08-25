@@ -562,7 +562,7 @@ public static class VirtualFS
     /// <remarks>
     /// Save the world to a archive file!
     /// </remarks>
-    public static int CommitArchive(string finalZipPath, string backupFolder)
+    public static (int committedFiles, bool backupCreated, bool oldBackupDeleted) CommitArchive(string finalZipPath, string backupFolder)
     {
         EnsureInitialized(nameof(CommitArchive));
         RequiredMode(Mode.Idle, nameof(CommitArchive));
@@ -583,6 +583,9 @@ public static class VirtualFS
             throw new IOException($"VirtualFS.CommitArchive: Failed to write temporary archive: {tempPath}");
         }
 
+        bool backupCreated = false;
+        bool oldBackupDeleted = false;
+
         // Back up the existing save file, if any.
         if (File.Exists(finalZipPath))
         {
@@ -592,6 +595,8 @@ public static class VirtualFS
 
             if (File.Exists(backupPath))
             {   
+                oldBackupDeleted = true;
+
                 // Delete the old backup if it already exists.
                 File.Delete(backupPath);
                 MechanicaSaveFix.Log.LogDebug($"Old backup archive file \"{backupPath}\" already existed and was deleted.");
@@ -607,6 +612,8 @@ public static class VirtualFS
             {
                 throw new IOException($"VirtualFS.CommitArchive: Failed to create backup archive: {backupPath}");
             }
+
+            backupCreated = true;
         }
 
         File.Move(tempPath, finalZipPath);
@@ -616,6 +623,6 @@ public static class VirtualFS
         }
 
         MechanicaSaveFix.Log.LogDebug($"Successfully saved the world to \"{finalZipPath}\" archive, with backup in \"{backupFolder}\".");
-        return committedFiles;
+        return (committedFiles, backupCreated, oldBackupDeleted);
     }
 }
