@@ -188,7 +188,7 @@ public static class VirtualFS
         EnsureInitialized(nameof(BeginSaveCapture));
         RequiredMode(Mode.Idle, nameof(BeginSaveCapture));
         _mode = Mode.Capturing;
-        MechanicaSaveFix.Log.LogInfo($"Save capture started in \"{_root}\"!");
+        MechanicaSaveFix.Log.LogDebug($"Save capture started in \"{_root}\"!");
     }
 
     /// <summary>
@@ -247,8 +247,6 @@ public static class VirtualFS
         string relativePath = ToRelativeSaveFilePath(absolutePath);
         string sanitizedPath = Utils.SanitizePath(relativePath);
 
-        MechanicaSaveFix.Log.LogDebug($"Checking existence of file in VFS: {sanitizedPath}");
-
         return _files.ContainsKey(sanitizedPath);
     }
 
@@ -265,8 +263,6 @@ public static class VirtualFS
         string sanitizedPath = Utils.SanitizePath(relativePath);
 
         bool fileExisted = _files.Remove(sanitizedPath);
-
-        MechanicaSaveFix.Log.LogDebug($"Deleted file from VFS: {sanitizedPath}. Existed: {fileExisted}.");
 
         return fileExisted;
     }
@@ -288,8 +284,6 @@ public static class VirtualFS
 
         _files[sanitizedPath] = bytes;
 
-        MechanicaSaveFix.Log.LogDebug($"Writing file \"{sanitizedPath}\" to VFS. Replaced: {IsReplace}. Content FNV-1a hash: {Utils.GetFastHash(bytes)}.");
-
         return IsReplace;
     }
 
@@ -306,11 +300,7 @@ public static class VirtualFS
         string relativePath = ToRelativeSaveFilePath(absolutePath);
         string sanitizedPath = Utils.SanitizePath(relativePath);
 
-        if (_files.TryGetValue(sanitizedPath, out byte[] fileContent))
-        {
-            MechanicaSaveFix.Log.LogDebug($"Reading file \"{sanitizedPath}\" from VFS. Content FNV-1a hash: {(fileContent.Length > 0 ? Utils.GetFastHash(fileContent) : "N/A")}.");
-        }
-        else
+        if (!_files.TryGetValue(sanitizedPath, out byte[] fileContent))
         {
             throw new FileNotFoundException($"VirtualFS.{nameof(ReadBinaryFile)}: File not found in virtual file system: {sanitizedPath}");
         }
@@ -447,8 +437,6 @@ public static class VirtualFS
         {
             _files.Remove(key);
         }
-
-        MechanicaSaveFix.Log.LogDebug($"Deleted directory and {matchingKeys.Count} file(s) from VFS: {relDir}");
     }
 
     /// <summary>
@@ -474,7 +462,7 @@ public static class VirtualFS
             }
         }
 
-        MechanicaSaveFix.Log.LogInfo($"Wrote {_files.Count} files to zip archive at \"{zipPath}\".");
+        MechanicaSaveFix.Log.LogDebug($"Wrote {_files.Count} files to zip archive at \"{zipPath}\".");
     }
 
     /// <summary>
@@ -518,7 +506,7 @@ public static class VirtualFS
             }
         }
 
-        MechanicaSaveFix.Log.LogInfo($"Loaded {_files.Count} files from zip archive at \"{zipPath}\".");
+        MechanicaSaveFix.Log.LogDebug($"Loaded {_files.Count} files from zip archive at \"{zipPath}\".");
     }
 
     /// <summary>
@@ -555,7 +543,7 @@ public static class VirtualFS
             _files[sanitizedPath] = bytes;
         }
 
-        MechanicaSaveFix.Log.LogInfo($"Loaded {_files.Count} files from folder at \"{folderPath}\".");
+        MechanicaSaveFix.Log.LogDebug($"Loaded {_files.Count} files from folder at \"{folderPath}\".");
     }
 
     /// <summary>
@@ -599,12 +587,12 @@ public static class VirtualFS
             {   
                 // Delete the old backup if it already exists.
                 File.Delete(backupPath);
-                MechanicaSaveFix.Log.LogInfo($"Old backup archive file \"{backupPath}\" already existed and was deleted.");
+                MechanicaSaveFix.Log.LogDebug($"Old backup archive file \"{backupPath}\" already existed and was deleted.");
             }
             else
             {
                 // Do nothing if no previous backup exists.
-                MechanicaSaveFix.Log.LogInfo($"No previous backup archive file found at \"{backupPath}\".");
+                MechanicaSaveFix.Log.LogDebug($"No previous backup archive file found at \"{backupPath}\".");
             }
 
             File.Move(finalZipPath, backupPath);
@@ -620,6 +608,6 @@ public static class VirtualFS
             throw new IOException($"VirtualFS.CommitArchive: Failed to write final archive: {finalZipPath}");
         }
 
-        MechanicaSaveFix.Log.LogInfo($"Successfully saved the world to \"{finalZipPath}\" archive, with backup in \"{backupFolder}\".");
+        MechanicaSaveFix.Log.LogDebug($"Successfully saved the world to \"{finalZipPath}\" archive, with backup in \"{backupFolder}\".");
     }
 }
