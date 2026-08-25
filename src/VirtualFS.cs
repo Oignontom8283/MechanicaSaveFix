@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 using System.IO.Compression;
 
 
-public enum Mode { Idle, Capturing, Playback,  }
+public enum Mode { Idle, Intercepting, }
 public enum EntryKind { Files, Directories, Both }
 
 
@@ -177,34 +177,20 @@ public static class VirtualFS
 
     // Methods for managing capture and playback operations
 
-    /// <summary>
-    /// Begins capturing save files.
-    /// </summary>
-    /// <remarks>
-    /// <b>The VFS must be initialized before calling this method!</b>
-    /// <para>To finish the capture, call <see cref="EndOperation"/>.</para>
-    /// </remarks>
-    public static void BeginSaveCapture()
-    {
-        EnsureInitialized(nameof(BeginSaveCapture));
-        RequiredMode(Mode.Idle, nameof(BeginSaveCapture));
-        _mode = Mode.Capturing;
-        MechanicaSaveFix.Log.LogDebug($"Save capture started in \"{_root}\"!");
-    }
 
     /// <summary>
     /// Begins playback of captured save files.
     /// </summary>
     /// <remarks>
     /// <b>The VFS must be initialized before calling this method!</b>
-    /// <para>To finish the playback, call <see cref="EndOperation"/>.</para>
+    /// <para>To finish the playback, call <see cref="EndIntercepting"/>.</para>
     /// </remarks>
-    public static void BeginLoadPlayback()
+    public static void StartIntercepting()
     {
-        EnsureInitialized(nameof(BeginLoadPlayback));
-        RequiredMode(Mode.Idle, nameof(BeginLoadPlayback));
-        _mode = Mode.Playback;
-        MechanicaSaveFix.Log.LogDebug($"Save playback started in \"{_root}\"!");
+        EnsureInitialized(nameof(StartIntercepting));
+        RequiredMode(Mode.Idle, nameof(StartIntercepting));
+        _mode = Mode.Intercepting;
+        MechanicaSaveFix.Log.LogDebug($"I/O intercepting started in \"{_root}\".");
     }
 
     /// <summary>
@@ -220,17 +206,17 @@ public static class VirtualFS
     /// <remarks>
     /// <b>Throws an exception if called when the system is not in capturing or playback mode.</b>
     /// </remarks>
-    public static void EndOperation()
+    public static void EndIntercepting()
     {
-        EnsureInitialized(nameof(EndOperation));
+        EnsureInitialized(nameof(EndIntercepting));
         
         if (!IsOperationActive())
         {
-            throw new InvalidOperationException($"VirtualFS.{nameof(EndOperation)}: No active operation to end. Current mode is {_mode}.");
+            throw new InvalidOperationException($"VirtualFS.{nameof(EndIntercepting)}: No active operation to end. Current mode is {_mode}.");
         }
 
         _mode = Mode.Idle;
-        MechanicaSaveFix.Log.LogDebug($"Operation (capture/playback) ended. Current mode is now {_mode}.");
+        MechanicaSaveFix.Log.LogDebug($"I/O intercepting ended. Current mode is now {_mode}.");
     }
 
 
