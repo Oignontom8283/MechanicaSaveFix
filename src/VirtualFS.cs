@@ -443,7 +443,8 @@ public static class VirtualFS
     /// Writes the contents of the virtual file system to a zip archive on disk at the specified path.
     /// </summary>
     /// <param name="zipPath">The path where the zip archive will be created.</param>
-    public static void WriteZipToDisk(string zipPath)
+    /// <returns>The number of files written to the zip archive.</returns>
+    public static int WriteZipToDisk(string zipPath)
     {
         EnsureInitialized(nameof(WriteZipToDisk));
         RequiredMode(Mode.Idle, nameof(WriteZipToDisk));
@@ -463,6 +464,7 @@ public static class VirtualFS
         }
 
         MechanicaSaveFix.Log.LogDebug($"Wrote {_files.Count} files to zip archive at \"{zipPath}\".");
+        return _files.Count;
     }
 
     /// <summary>
@@ -471,7 +473,8 @@ public static class VirtualFS
     /// <param name="zipPath">The path to the zip archive file.</param>
     /// <exception cref="FileNotFoundException">Thrown when the specified zip file is not found.</exception>
     /// <exception cref="InvalidOperationException">Thrown when a duplicate file entry is found in the zip archive.</exception>
-    public static void LoadZipFromDisk(string zipPath)
+    /// <returns>The number of files loaded from the zip archive.</returns>
+    public static int LoadZipFromDisk(string zipPath)
     {
         EnsureInitialized(nameof(LoadZipFromDisk));
         RequiredMode(Mode.Idle, nameof(LoadZipFromDisk));
@@ -507,6 +510,7 @@ public static class VirtualFS
         }
 
         MechanicaSaveFix.Log.LogDebug($"Loaded {_files.Count} files from zip archive at \"{zipPath}\".");
+        return _files.Count;
     }
 
     /// <summary>
@@ -515,7 +519,8 @@ public static class VirtualFS
     /// <param name="folderPath">The path to the folder to load.</param>
     /// <exception cref="DirectoryNotFoundException">Thrown when the specified folder is not found.</exception>
     /// <exception cref="InvalidOperationException">Thrown when a duplicate file entry is found in the folder.</exception>
-    public static void LoadFolderFromDisk(string folderPath)
+    /// <returns>The number of files loaded from the folder.</returns>
+    public static int LoadFolderFromDisk(string folderPath)
     {
         EnsureInitialized(nameof(LoadFolderFromDisk));
         RequiredMode(Mode.Idle, nameof(LoadFolderFromDisk));
@@ -544,6 +549,7 @@ public static class VirtualFS
         }
 
         MechanicaSaveFix.Log.LogDebug($"Loaded {_files.Count} files from folder at \"{folderPath}\".");
+        return _files.Count;
     }
 
     /// <summary>
