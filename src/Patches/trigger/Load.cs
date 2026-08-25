@@ -17,7 +17,7 @@ public static class Patch_SaveManager_LoadSave
         MechanicaSaveFix.Log.LogMessage($"VirtualFS initialized!");
         
         MechanicaSaveFix.Log.LogInfo($"Save root path: {saveFolderPath}");
-        MechanicaSaveFix.Log.LogInfo($"Save archive finded? ${isExistArchive} at \"{saveArchivePath}\".");
+        MechanicaSaveFix.Log.LogInfo($"Save archive finded? - {isExistArchive} at \"{saveArchivePath}\".");
         
         int loadedFiles = 0;
         if (isExistArchive)
