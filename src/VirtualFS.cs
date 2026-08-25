@@ -53,7 +53,7 @@ public static class VirtualFS
         {
             throw new InvalidOperationException("VirtualFS.Initialize: Already initialized.");
         }
-        _root = Path.GetFullPath(RootSaveDirectory);
+        _root = RootSaveDirectory;
     }
 
     /// <summary>
@@ -562,7 +562,7 @@ public static class VirtualFS
     /// <remarks>
     /// Save the world to a archive file!
     /// </remarks>
-    public static void CommitArchive(string finalZipPath, string backupFolder)
+    public static int CommitArchive(string finalZipPath, string backupFolder)
     {
         EnsureInitialized(nameof(CommitArchive));
         RequiredMode(Mode.Idle, nameof(CommitArchive));
@@ -577,7 +577,7 @@ public static class VirtualFS
             MechanicaSaveFix.Log.LogWarning($"Temporary archive file \"{tempPath}\" already existed and was deleted.");
         }
 
-        WriteZipToDisk(tempPath);
+        int committedFiles = WriteZipToDisk(tempPath);
         if (!Utils.VerifyFileValid(tempPath)) // Verify that the temporary file was created successfully.
         {
             throw new IOException($"VirtualFS.CommitArchive: Failed to write temporary archive: {tempPath}");
@@ -616,5 +616,6 @@ public static class VirtualFS
         }
 
         MechanicaSaveFix.Log.LogDebug($"Successfully saved the world to \"{finalZipPath}\" archive, with backup in \"{backupFolder}\".");
+        return committedFiles;
     }
 }
