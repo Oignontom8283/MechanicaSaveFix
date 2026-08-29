@@ -62,6 +62,10 @@
       <HintPath>Libraries/UnityEngine.dll</HintPath>
     </Reference>
 
+    <Reference Include="UnityEngine.UI">
+      <HintPath>Libraries/UnityEngine.UI.dll</HintPath>
+    </Reference>
+
     <Reference Include="Assembly-CSharp">
       <HintPath>Libraries/Assembly-CSharp.dll</HintPath>
     </Reference>
