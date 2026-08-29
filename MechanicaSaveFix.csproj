@@ -74,14 +74,6 @@
       <HintPath>Libraries/Assembly-CSharp.dll</HintPath>
     </Reference>
 
-    <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>Libraries/Assembly-CSharp-firstpass.dll</HintPath>
-    </Reference>
-
-    <Reference Include="PhotonRealtime">
-      <HintPath>Libraries/PhotonRealtime.dll</HintPath>
-    </Reference>
-
     <Reference Include="PhotonUnityNetworking">
       <HintPath>Libraries/PhotonUnityNetworking.dll</HintPath>
     </Reference>
