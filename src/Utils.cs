@@ -273,17 +273,17 @@ public static class Utils
     /// </summary>
     /// <typeparam name="T">The type of object to deserialize.</typeparam>
     /// <param name="json">The JSON string to deserialize.</param>
-    /// <param name="defaultValue">The default value to return if deserialization fails.</param>
+    /// <exception cref="InvalidOperationException">Thrown when deserialization fails.</exception>
     /// <returns>The deserialized object, or the default value if deserialization fails.</returns>
-    public static T TryFromJson<T>(string json, T defaultValue = default)
+    public static T TryFromJson<T>(string json)
     {
         try
         {
             return JsonUtility.FromJson<T>(json);
         }
-        catch
+        catch (Exception ex)
         {
-            return defaultValue;
+            throw new InvalidOperationException($"Failed to deserialize JSON to type {typeof(T).FullName}.", ex);
         }
     }
 
