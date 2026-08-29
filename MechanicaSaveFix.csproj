@@ -66,6 +66,10 @@
       <HintPath>Libraries/UnityEngine.UI.dll</HintPath>
     </Reference>
 
+    <Reference Include="UnityEngine.ImageConversionModule">
+      <HintPath>Libraries/UnityEngine.ImageConversionModule.dll</HintPath>
+    </Reference>
+
     <Reference Include="Assembly-CSharp">
       <HintPath>Libraries/Assembly-CSharp.dll</HintPath>
     </Reference>
