@@ -290,19 +290,25 @@ public static class Utils
     /// <summary>
     /// Tries to deserialize a JSON string into an object of the specified type.
     /// </summary>
-    /// <typeparam name="T">The type of object to deserialize.</typeparam>
+    /// <typeparam name="T">The type of object to deserialize (must be a class).</typeparam>
     /// <param name="json">The JSON string to deserialize.</param>
-    /// <returns>The deserialized object, or the default value if deserialization fails.</returns>
-    /// <exception cref="InvalidOperationException"></exception>
-    public static T FromJsonOrThrow<T>(string json)
+    /// <returns>The deserialized object, or null</returns>
+    public static T FromJsonOrNull<T>(string json) where T : class
     {
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            MechanicaSaveFix.Log.LogWarning($"Failed to deserialize JSON to type {typeof(T).FullName}: input string is null or empty.");
+            return null;
+        }
+
         try
         {
             return JsonUtility.FromJson<T>(json);
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException($"Failed to deserialize JSON to type {typeof(T).FullName}.", ex);
+            MechanicaSaveFix.Log.LogWarning($"Failed to deserialize JSON to type {typeof(T).FullName}: {ex.Message}");
+            return null;
         }
     }
 
