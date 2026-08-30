@@ -313,6 +313,50 @@ public static class Utils
     }
 
     /// <summary>
+    /// Serializes an object to a JSON string. Throws an exception if serialization fails.
+    /// </summary>
+    /// <typeparam name="T">The type of the object to serialize.</typeparam>
+    /// <param name="obj">The object to serialize.</param>
+    /// <returns>The JSON string representing the object.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when serialization fails.</exception>
+    public static string ToJsonOrThrow<T>(T obj)
+    {
+        try
+        {
+            return JsonUtility.ToJson(obj);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Failed to serialize object of type {typeof(T).FullName} to JSON.", ex);
+        }
+    }
+
+    /// <summary>
+    /// Serializes an object to a JSON string. Returns null if serialization fails.
+    /// </summary>
+    /// <typeparam name="T">The type of the object to serialize.</typeparam>
+    /// <param name="obj">The object to serialize.</param>
+    /// <returns>The JSON string representing the object, or null if serialization fails.</returns>
+    public static string ToJsonOrNull<T>(T obj)
+    {
+        if (obj == null)
+        {
+            MechanicaSaveFix.Log.LogWarning($"Failed to serialize object of type {typeof(T).FullName} to JSON: object is null.");
+            return null;
+        }
+
+        try
+        {
+            return JsonUtility.ToJson(obj);
+        }
+        catch (Exception ex)
+        {
+            MechanicaSaveFix.Log.LogWarning($"Failed to serialize object of type {typeof(T).FullName} to JSON: {ex.Message}");
+            return null;
+        }
+    }
+
+    /// <summary>
     /// Reads a single file from a zip archive on disk and returns its content as a byte array.
     /// </summary>
     /// <param name="zipPath">The path to the zip archive file.</param>
