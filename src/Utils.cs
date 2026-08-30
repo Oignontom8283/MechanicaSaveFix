@@ -275,7 +275,7 @@ public static class Utils
     /// <param name="json">The JSON string to deserialize.</param>
     /// <exception cref="InvalidOperationException">Thrown when deserialization fails.</exception>
     /// <returns>The deserialized object, or the default value if deserialization fails.</returns>
-    public static T TryFromJson<T>(string json)
+    public static T FromJsonOrThrow<T>(string json)
     {
         try
         {
