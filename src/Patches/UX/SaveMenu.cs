@@ -294,4 +294,124 @@ public static class Patch_LoadGameMenu_Start
 
 
     // Handles the actions triggered by a save row, including loading, deleting, and editing settings.
-    
+    #region Entry callbacks
+
+    /// <summary>
+    /// Loads the selected save from either a folder or an archived .msa file while guarding against invalid states.
+    /// </summary>
+    /// <param name="instance">The menu instance that owns the selected entry.</param>
+    /// <param name="savePath">The save path to load.</param>
+    private static void OnEntryClicked(LoadGameMenu instance, string savePath)
+    {
+        if (ConfirmationPopup.IsOpen) return;
+
+        var saveManager = Singleton<SaveManager>.Instance;
+        
+        // Don't allow loading a save while the game is already loading one.
+        if (saveManager.isLoading) return;
+
+        // Don't allow loading a save if we're not connected to the master server (for multiplayer).
+        if (!saveManager.connectedToMaster && PhotonNetwork.IsConnected)
+        {
+            Debug.LogWarning("Not connected to master!");
+            return;
+        }
+
+        // Fade the menu music out and show the loading screens.
+        instance.StartCoroutine((IEnumerator)FadeOutMusicMethod.Invoke(instance, null));
+        Singleton<LoadingScreen>.Instance.Show();
+        Singleton<Lobby>.Instance.ShowAllLoadingScreens();
+
+        saveManager.LoadSave(savePath, true, Singleton<Lobby>.Instance.pCurrent_lobbyID, false);
+    }
+
+    /// <summary>
+    /// Confirms the save deletion, removes the underlying save data from disk, and refreshes the list afterwards.
+    /// </summary>
+    /// <param name="instance">The load menu instance whose rows should be refreshed.</param>
+    /// <param name="savePath">The save folder or archive to delete.</param>
+    /// <param name="gameSave">The metadata for the save being deleted.</param>
+    private static void OnEntryDeleteClicked(LoadGameMenu instance, string savePath, GameSave gameSave)
+    {
+        if (ConfirmationPopup.IsOpen) return;
+
+        ConfirmationPopup.Show(
+            title: "Are you sure?",
+            message: $"Delete '{gameSave.saveName}'",
+            onConfirm: () =>
+            {
+                // If the save is a folder, delete it recursively. If it's an archive, delete just the file.
+                if (Utils.GetPathType(savePath) == Utils.PathType.Directory)
+                {   
+                    Directory.Delete(savePath, recursive: true);
+                    MechanicaSaveFix.Log.LogMessage($"Deleted save folder at \"{savePath}\".");
+                }
+                else
+                {
+                    File.Delete(savePath);
+                    MechanicaSaveFix.Log.LogMessage($"Deleted save file at \"{savePath}\".");
+                }
+
+                // Rebuild from disk instead of removing just one entry, to keep both paths in sync.
+                RebuildSaveEntries(instance);
+            }
+        );
+    }
+
+    /// <summary>
+    /// Opens the difficulty editor for the selected save, creates default settings if missing, and persists any edits.
+    /// </summary>
+    /// <param name="instance">The load menu instance owning the save row.</param>
+    /// <param name="savePath">The save folder or archive whose settings should be edited.</param>
+    /// <param name="gameSave">The metadata associated with the save.</param>
+    private static void OnSettingsButtonClicked(LoadGameMenu instance, string savePath, GameSave gameSave)
+    {
+        if (SettingsScreenController.IsOpen) return;
+
+        string gameSettings = "gamesettings.txt";
+
+        bool isArchive = Utils.GetPathType(savePath) == Utils.PathType.File;
+        string settingsPath = isArchive ? savePath : Path.Combine(savePath, gameSettings);
+
+        // Read the raw json from wherever it lives: inside the .msa if it's an archive,
+        // or as a loose file next to the save otherwise.
+        string settingsText = isArchive
+            ? Utils.ReadSingleTextFileFromZip(settingsPath, gameSettings)
+            : (File.Exists(settingsPath) ? File.ReadAllText(settingsPath) : null);
+
+        GameDifficultySave settingsSave = settingsText != null
+            ? Utils.FromJsonOrNull<GameDifficultySave>(settingsText)
+            : null;
+
+        // Missing, or present but unreadable/corrupted: fall back to the screen's current
+        // defaults and persist them so the next open finds a valid file.
+        if (settingsSave == null)
+        {
+            settingsSave = DifficultySettingsScreenRef(instance).RetrieveCurrentSettings();
+            string defaultJson = Utils.ToJsonOrThrow(settingsSave);
+
+            if (isArchive)
+                Utils.WriteSingleTextFileToZip(settingsPath, gameSettings, defaultJson);
+            else
+                File.WriteAllText(settingsPath, defaultJson);
+        }
+
+        SettingsScreenController.Show(
+            settingsSave,
+            onSubmit: editedSave =>
+            {
+                string settingsJson = Utils.ToJsonOrThrow(editedSave);
+
+                if (isArchive)
+                    Utils.WriteSingleTextFileToZip(settingsPath, gameSettings, settingsJson);
+                else
+                    File.WriteAllText(settingsPath, settingsJson);
+
+                MechanicaSaveFix.Log.LogMessage($"{gameSave.saveName}'s difficulty settings updated!");
+                MechanicaSaveFix.Log.LogDebug($"Saved difficulty settings for '{gameSave.saveName}' to \"{settingsPath}\".");
+            }
+        );
+    }
+
+    #endregion
+}
