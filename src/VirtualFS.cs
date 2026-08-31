@@ -54,6 +54,7 @@ public static class VirtualFS
             throw new InvalidOperationException("VirtualFS.Initialize: Already initialized.");
         }
         _root = RootSaveDirectory;
+        _files.Clear();
     }
 
     /// <summary>

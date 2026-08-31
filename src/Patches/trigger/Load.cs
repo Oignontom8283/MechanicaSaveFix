@@ -13,6 +13,11 @@ public static class Patch_SaveManager_LoadSave
         string saveArchivePath = Path.ChangeExtension(saveFolderPath, ".msa");
         bool isExistArchive = File.Exists(saveArchivePath);
 
+        if (VirtualFS.IsInitialized())
+        {
+            MechanicaSaveFix.Log.LogWarning("VirtualFS was already initialized on world load, force-deinitialized.");
+            VirtualFS.Deinitialize();
+        }
         VirtualFS.Initialize(saveFolderPath);
         MechanicaSaveFix.Log.LogMessage($"VirtualFS initialized!");
         
