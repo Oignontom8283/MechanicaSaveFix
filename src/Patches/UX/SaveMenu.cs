@@ -95,4 +95,57 @@ public static class Patch_LoadGameMenu_Start
 
 
     // Runs when the save menu starts, rebuilds the list, and keeps the menu aligned with the current screen scale.
+    #region Entry point (Start)
+
+    /// <summary>
+    /// Replaces the original menu startup logic to rebuild the save list and hook the menu to the resolution-change callback.
+    /// </summary>
+    /// <param name="__instance">The LoadGameMenu instance being initialized.</param>
+    /// <returns>Always false so the original Start method is skipped.</returns>
+    static bool Prefix(LoadGameMenu __instance)
+    {
+        // Link the confirmation popup to the game's existing popup UI.
+        ConfirmationPopup.Bind(DeleteConfirmDisplayRef(__instance));
+
+        // Move the menu off-screen before it's filled (matches original Start).
+        RepositionMenuContent(__instance);
+
+        // Read saves from disk and build one entry per save.
+        RebuildSaveEntries(__instance);
+
+        // Move the menu back into place now that its size is known (matches original Start).
+        RepositionMenuContent(__instance);
+
+        // Rescale the menu whenever the screen resolution changes.
+        SubscribeToResolutionChange(__instance);
+
+        return false; // skip the original Start
+    }
+
+    /// <summary>
+    /// Moves the menu content offscreen or back into view based on the current content height and canvas scale.
+    /// </summary>
+    /// <param name="instance">The load menu instance whose content should be repositioned.</param>
+    private static void RepositionMenuContent(LoadGameMenu instance)
+    {
+        RectTransform menuContent = MenuContentRef(instance);
+        float canvasScale = Singleton<SettingsManager>.Instance.canvasScale;
+        menuContent.anchoredPosition = new Vector2(0f, -Screen.height / 2f / canvasScale - menuContent.rect.height / 2f);
+    }
+
+    /// <summary>
+    /// Subscribes the menu's canvas-scaling refresh to the settings manager's resolution-change callback.
+    /// </summary>
+    /// <param name="instance">The load menu instance whose scaling should be refreshed.</param>
+    private static void SubscribeToResolutionChange(LoadGameMenu instance)
+    {
+        SettingsManager settings = Singleton<SettingsManager>.Instance;
+        var updateCanvasScale = (Action)Delegate.CreateDelegate(typeof(Action), instance, UpdateCanvasScaleMethod);
+        OnResolutionChangeRef(settings) = (Action)Delegate.Combine(OnResolutionChangeRef(settings), updateCanvasScale);
+    }
+
+    #endregion
+
+
+    // Discovers every save on disk, including both legacy folders and archived .msa files.
     
