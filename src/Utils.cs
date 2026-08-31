@@ -365,9 +365,9 @@ public static class Utils
     /// <exception cref="FileNotFoundException">Thrown when the specified zip file is not found.</exception>
     public static byte[] ReadSingleByteFileFromZip(string zipPath, string entryName)
     {
-        if (!File.Exists(zipPath))
+        if (!File.Exists(zipPath) && !VerifyFileValid(zipPath))
         {
-            throw new FileNotFoundException($"${nameof(ReadSingleByteFileFromZip)}: Zip file not found: {zipPath}");
+            throw new FileNotFoundException($"${nameof(ReadSingleByteFileFromZip)}: Archive file not found: {zipPath}");
         }
 
         string sanitizedEntryName = SanitizePath(entryName);
