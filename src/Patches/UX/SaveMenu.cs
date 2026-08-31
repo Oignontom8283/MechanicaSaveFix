@@ -148,4 +148,57 @@ public static class Patch_LoadGameMenu_Start
 
 
     // Discovers every save on disk, including both legacy folders and archived .msa files.
+    #region Save discovery
+
+    /// <summary>
+    /// Reads all valid save folders and .msa archives from disk and returns their paths, metadata, and thumbnails.
+    /// </summary>
+    /// <returns>An array containing each save path and its parsed GameSave data together with its thumbnail bytes.</returns>
+    private static (string SavePath, GameSave GameSave, byte[] ThumbnailBytes)[] GetSavesInfo()
+    {
+        string savesPath = Singleton<SaveManager>.Instance.pGameSavesFolderPath;
+
+        if (!Directory.Exists(savesPath))
+        {
+            throw new DirectoryNotFoundException($"Saves folder not found at \"{savesPath}\".");
+        }
+
+        var savesInfo = new List<(string, GameSave, byte[])>();
+
+        // Legacy saves: read saveinfo and thumbnail straight from the folder.
+        foreach (string saveFolderPath in Directory.GetDirectories(savesPath))
+        {
+            string saveInfoPath = Path.Combine(saveFolderPath, "saveinfo.txt");
+            string thumbnailPath = Path.Combine(saveFolderPath, "thumbnail.jpg");
+
+            if (!File.Exists(saveInfoPath) || !File.Exists(thumbnailPath))
+            {
+                MechanicaSaveFix.Log.LogWarning($"Save info or thumbnail not found at \"{saveInfoPath}\". Skipping.");
+                continue;
+            }
+
+            string saveInfoText = File.ReadAllText(saveInfoPath);
+            byte[] thumbnailBytes = File.ReadAllBytes(thumbnailPath);
+            GameSave gameSave = Utils.FromJsonOrThrow<GameSave>(saveInfoText);
+
+            savesInfo.Add((saveFolderPath, gameSave, thumbnailBytes));
+        }
+
+        // Archived saves: read saveinfo and thumbnail from inside the .msa zip.
+        foreach (string saveArchivePath in Directory.GetFiles(savesPath, "*.msa"))
+        {
+            string saveInfoText = Utils.ReadSingleTextFileFromZip(saveArchivePath, "saveinfo.txt");
+            byte[] thumbnailBytes = Utils.ReadSingleByteFileFromZip(saveArchivePath, "thumbnail.jpg");
+            GameSave gameSave = Utils.FromJsonOrThrow<GameSave>(saveInfoText);
+
+            savesInfo.Add((saveArchivePath, gameSave, thumbnailBytes));
+        }
+
+        return savesInfo.ToArray();
+    }
+
+    #endregion
+
+
+    // Rebuilds the visible save list from disk and keeps the menu layout in sync with the new entries.
     
