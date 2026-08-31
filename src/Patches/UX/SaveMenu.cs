@@ -226,73 +226,70 @@ public static class Patch_LoadGameMenu_Start
     // Rebuilds the visible save list from disk and keeps the menu layout in sync with the new entries.
     #region Entry list
 
-    /// <summary>
-    /// Clears the current save entries and repopulates the menu from the disk-backed save list.
-    /// </summary>
-    /// <param name="instance">The load menu whose entries should be rebuilt.</param>
     private static void RebuildSaveEntries(LoadGameMenu instance)
     {
-        // Get the list of legacy and archive saves.
         var savesInfo = GetSavesInfo();
 
-        // Clear the existing entries, if any, before adding the new ones.
-        RemoveSaveEntriesMethod.Invoke(instance, null);
+        RemoveAllSaveEntries(instance); // notre propre nettoyage, remplace RemoveSaveEntriesMethod.Invoke
 
-        // Get the UI references shared by every entry.
         MenuContext menuContext = GetMenuContext(instance);
 
-        // Add each save entry to the menu.
-        foreach (var (savePath, gameSave, thumbnailBytes) in savesInfo)
+        for (int i = 0; i < savesInfo.Length; i++)
         {
-            AddSaveEntry(instance, menuContext, savePath, gameSave, thumbnailBytes);
+            var (savePath, gameSave, thumbnailBytes) = savesInfo[i];
+            AddSaveEntry(instance, menuContext, savePath, gameSave, thumbnailBytes, index: i);
         }
 
-        // Show the "no saves" message if the list is empty.
         Behaviour noSaves = NoSavesRef(instance);
         if (noSaves != null)
         {
             noSaves.enabled = savesInfo.Length == 0;
         }
 
-        // Resize the container and refresh the canvas scale to fit the new entries.
         ResizeContainerMethod.Invoke(instance, null);
         UpdateCanvasScaleMethod.Invoke(instance, null);
     }
 
-    /// <summary>
-    /// Instantiates one save row, fills in its metadata, applies the thumbnail, and wires the action buttons.
-    /// </summary>
-    /// <param name="instance">The owning load menu.</param>
-    /// <param name="menuContext">The shared menu UI references used by every save row.</param>
-    /// <param name="savePath">The file or folder path for the save being represented.</param>
-    /// <param name="gameSave">The parsed save metadata to display.</param>
-    /// <param name="thumbnailBytes">The thumbnail image bytes to render on the row.</param>
+    // Destroys every previously spawned entry, since the game's own RemoveSaveEntries
+    // relies on loadedGameSaves, which we never populate.
+    private static void RemoveAllSaveEntries(LoadGameMenu instance)
+    {
+        List<RectTransform> entryRects = EntryRectsRef(instance);
+        foreach (RectTransform rect in entryRects)
+        {
+            UnityEngine.Object.Destroy(rect.gameObject);
+        }
+        entryRects.Clear();
+    }
+
     private static void AddSaveEntry(
         LoadGameMenu instance,
         MenuContext menuContext,
         string savePath,
         GameSave gameSave,
-        byte[] thumbnailBytes)
+        byte[] thumbnailBytes,
+        int index)
     {
         if (gameSave == null) return;
 
-        // Spawn the entry prefab.
         RectTransform newRect = UnityEngine.Object.Instantiate(menuContext.Prefab, menuContext.Container)
             .GetComponent<RectTransform>();
 
-        // Fill in the name and day count.
         newRect.Find("SaveName").GetComponent<Text>().text = gameSave.saveName;
         newRect.Find("Day").GetComponent<Text>().text = "Day " + (gameSave.elapsedDays + 1);
 
-        // Show the thumbnail, if we have one.
         ApplyThumbnail(newRect, thumbnailBytes);
 
-        // Each button gets exactly what it needs (save path, GameSave) directly.
+        // Position this entry in the vertical list ourselves, since the game's
+        // RepositionSaveEntry relies on saveClassToRect, which we never populate.
+        newRect.anchoredPosition = new Vector2(
+            newRect.anchoredPosition.x,
+            -(newRect.sizeDelta.y * index) - newRect.sizeDelta.y / 2f);
+
         newRect.gameObject.GetComponent<Button>().onClick.AddListener(() => OnEntryClicked(instance, savePath));
         newRect.Find("DeleteButton").GetComponent<Button>().onClick.AddListener(() => OnEntryDeleteClicked(instance, savePath, gameSave));
         newRect.Find("SettingsButton").GetComponent<Button>().onClick.AddListener(() => OnSettingsButtonClicked(instance, savePath, gameSave));
 
-        // Track the new entry like the original does.
         menuContext.EntryRects.Add(newRect);
     }
 
