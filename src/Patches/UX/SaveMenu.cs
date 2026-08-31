@@ -43,8 +43,8 @@ public static class Patch_LoadGameMenu_Start
     private static readonly AccessTools.FieldRef<LoadGameMenu, RectTransform> DeleteConfirmDisplayRef =
         AccessTools.FieldRefAccess<LoadGameMenu, RectTransform>("deleteConfirmDisplay");
 
-    private static readonly AccessTools.FieldRef<LoadGameMenu, RectTransform> SettingsContainerRef =
-        AccessTools.FieldRefAccess<LoadGameMenu, RectTransform>("settingsContainer");
+    private static readonly AccessTools.FieldRef<LoadGameMenu, GameObject> SettingsContainerRef =
+        AccessTools.FieldRefAccess<LoadGameMenu, GameObject>("settingsContainer");
 
     private static readonly AccessTools.FieldRef<LoadGameMenu, DifficultySettingsScreen> DifficultySettingsScreenRef =
         AccessTools.FieldRefAccess<LoadGameMenu, DifficultySettingsScreen>("difficultySettingsScreen");
@@ -104,6 +104,7 @@ public static class Patch_LoadGameMenu_Start
     /// <returns>Always false so the original Start method is skipped.</returns>
     static bool Prefix(LoadGameMenu __instance)
     {
+        // Bind the confirmation popup and the difficulty settings screen to the existing UI hierarchy.
         ConfirmationPopup.Bind(DeleteConfirmDisplayRef(__instance));
         SettingsScreenController.Bind(SettingsContainerRef(__instance), DifficultySettingsScreenRef(__instance));
 

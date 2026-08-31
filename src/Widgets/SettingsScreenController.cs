@@ -10,7 +10,7 @@ using UnityEngine;
 /// </summary>
 public static class SettingsScreenController
 {
-    private static RectTransform _container;
+    private static GameObject _container;
     private static DifficultySettingsScreen _screen;
 
     private static Action<GameDifficultySave> _onSubmit;
@@ -19,14 +19,14 @@ public static class SettingsScreenController
     public static bool IsOpen { get; private set; }
 
     /// <summary>Binds to the game's existing settings container and screen. Call once.</summary>
-    public static void Bind(RectTransform settingsContainer, DifficultySettingsScreen difficultyScreen)
+    public static void Bind(GameObject settingsContainer, DifficultySettingsScreen difficultyScreen)
     {
-        if (_container != null) return; // already bound
+        if (_container != null) return;
 
         _container = settingsContainer;
         _screen = difficultyScreen;
 
-        _container.gameObject.SetActive(false);
+        _container.SetActive(false); // plus de .gameObject devant, GameObject a directement SetActive
     }
 
     /// <summary>
@@ -46,7 +46,7 @@ public static class SettingsScreenController
         _onSubmit = onSubmit;
         _onCancel = onCancel;
 
-        _container.gameObject.SetActive(true);
+        _container.SetActive(true);
         IsOpen = true;
     }
 
@@ -74,8 +74,7 @@ public static class SettingsScreenController
 
     private static void Close()
     {
-        _container.gameObject.SetActive(false);
-        IsOpen = false;
+        _container.SetActive(false);
         _onSubmit = null;
         _onCancel = null;
     }
