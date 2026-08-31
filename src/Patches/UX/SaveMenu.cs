@@ -71,7 +71,7 @@ public static class Patch_LoadGameMenu_Start
     #region Menu-wide context
 
     // Holds the UI references shared by every save entry (prefab, container, list).
-    private readonly struct MenuContext
+    private struct MenuContext
     {
         public readonly GameObject Prefab;
         public readonly Transform Container;
