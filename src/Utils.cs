@@ -406,4 +406,49 @@ public static class Utils
             return BytesToText(entryBytes);
         }
     }
+
+    /// <summary>
+    /// Adds or replaces a single binary file inside a zip archive on disk. If an entry with
+    /// the same name already exists, it is removed first, then re-added with the new content.
+    /// </summary>
+    /// <param name="zipPath">The path to the zip archive file. Created if it doesn't exist.</param>
+    /// <param name="entryName">The name of the file entry inside the archive.</param>
+    /// <param name="content">The binary content to write.</param>
+    /// <remarks>This method is not recommended for writing multiple files.</remarks>
+    public static void WriteSingleByteFileToZip(string zipPath, string entryName, byte[] content)
+    {
+        if (File.Exists(zipPath) && !VerifyFileValid(zipPath))
+        {
+            throw new InvalidOperationException($"Archive file is invalid or empty: {zipPath}");
+        }
+
+        string sanitizedEntryName = SanitizePath(entryName);
+
+        using (var zipStream = new FileStream(zipPath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+        using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Update))
+        {
+            // ZipArchive has no "overwrite" option: remove the old entry first, if present.
+            ZipArchiveEntry existingEntry = archive.GetEntry(sanitizedEntryName);
+            existingEntry?.Delete();
+
+            ZipArchiveEntry newEntry = archive.CreateEntry(sanitizedEntryName, CompressionLevel.Optimal);
+
+            using (var entryStream = newEntry.Open())
+            {
+                entryStream.Write(content, 0, content.Length);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Adds or replaces a single text file inside a zip archive on disk, encoding it as UTF-8.
+    /// </summary>
+    /// <param name="zipPath">The path to the zip archive file. Created if it doesn't exist.</param>
+    /// <param name="entryName">The name of the file entry inside the archive.</param>
+    /// <param name="content">The text content to write.</param>
+    /// <remarks>This method is not recommended for writing multiple files.</remarks>
+    public static void WriteSingleTextFileToZip(string zipPath, string entryName, string content)
+    {
+        WriteSingleByteFileToZip(zipPath, entryName, TextToBytes(content));
+    }
 }
