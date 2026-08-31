@@ -156,6 +156,8 @@ public static class Patch_LoadGameMenu_Start
 
     /// <summary>
     /// Reads all valid save folders and .msa archives from disk and returns their paths, metadata, and thumbnails.
+    /// A save only needs a valid saveinfo.txt to be listed; a missing thumbnail is not disqualifying.
+    /// Any save that fails to read is skipped and logged, without affecting the others.
     /// </summary>
     /// <returns>An array containing each save path and its parsed GameSave data together with its thumbnail bytes.</returns>
     private static (string SavePath, GameSave GameSave, byte[] ThumbnailBytes)[] GetSavesInfo()
@@ -175,15 +177,20 @@ public static class Patch_LoadGameMenu_Start
             string saveInfoPath = Path.Combine(saveFolderPath, "saveinfo.txt");
             string thumbnailPath = Path.Combine(saveFolderPath, "thumbnail.jpg");
 
-            if (!File.Exists(saveInfoPath) || !File.Exists(thumbnailPath))
+            if (!File.Exists(saveInfoPath))
             {
-                MechanicaSaveFix.Log.LogWarning($"Save info or thumbnail not found at \"{saveInfoPath}\". Skipping.");
+                MechanicaSaveFix.Log.LogWarning($"No saveinfo.txt found in \"{saveFolderPath}\". Skipping.");
                 continue;
             }
 
-            string saveInfoText = File.ReadAllText(saveInfoPath);
-            byte[] thumbnailBytes = File.ReadAllBytes(thumbnailPath);
-            GameSave gameSave = Utils.FromJsonOrThrow<GameSave>(saveInfoText);
+            GameSave gameSave = Utils.FromJsonOrNull<GameSave>(File.ReadAllText(saveInfoPath));
+            if (gameSave == null)
+            {
+                MechanicaSaveFix.Log.LogWarning($"Failed to parse saveinfo.txt in \"{saveFolderPath}\". Skipping.");
+                continue;
+            }
+
+            byte[] thumbnailBytes = File.Exists(thumbnailPath) ? File.ReadAllBytes(thumbnailPath) : null;
 
             savesInfo.Add((saveFolderPath, gameSave, thumbnailBytes));
         }
@@ -192,8 +199,20 @@ public static class Patch_LoadGameMenu_Start
         foreach (string saveArchivePath in Directory.GetFiles(savesPath, "*.msa"))
         {
             string saveInfoText = Utils.ReadSingleTextFileFromZip(saveArchivePath, "saveinfo.txt");
+            if (saveInfoText == null)
+            {
+                MechanicaSaveFix.Log.LogWarning($"No saveinfo.txt found inside archive \"{saveArchivePath}\". Skipping.");
+                continue;
+            }
+
+            GameSave gameSave = Utils.FromJsonOrNull<GameSave>(saveInfoText);
+            if (gameSave == null)
+            {
+                MechanicaSaveFix.Log.LogWarning($"Failed to parse saveinfo.txt inside archive \"{saveArchivePath}\". Skipping.");
+                continue;
+            }
+
             byte[] thumbnailBytes = Utils.ReadSingleByteFileFromZip(saveArchivePath, "thumbnail.jpg");
-            GameSave gameSave = Utils.FromJsonOrThrow<GameSave>(saveInfoText);
 
             savesInfo.Add((saveArchivePath, gameSave, thumbnailBytes));
         }
