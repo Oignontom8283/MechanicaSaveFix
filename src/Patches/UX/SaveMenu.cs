@@ -201,4 +201,97 @@ public static class Patch_LoadGameMenu_Start
 
 
     // Rebuilds the visible save list from disk and keeps the menu layout in sync with the new entries.
+    #region Entry list
+
+    /// <summary>
+    /// Clears the current save entries and repopulates the menu from the disk-backed save list.
+    /// </summary>
+    /// <param name="instance">The load menu whose entries should be rebuilt.</param>
+    private static void RebuildSaveEntries(LoadGameMenu instance)
+    {
+        // Get the list of legacy and archive saves.
+        var savesInfo = GetSavesInfo();
+
+        // Clear the existing entries, if any, before adding the new ones.
+        RemoveSaveEntriesMethod.Invoke(instance, null);
+
+        // Get the UI references shared by every entry.
+        MenuContext menuContext = GetMenuContext(instance);
+
+        // Add each save entry to the menu.
+        foreach (var (savePath, gameSave, thumbnailBytes) in savesInfo)
+        {
+            AddSaveEntry(instance, menuContext, savePath, gameSave, thumbnailBytes);
+        }
+
+        // Show the "no saves" message if the list is empty.
+        Behaviour noSaves = NoSavesRef(instance);
+        if (noSaves != null)
+        {
+            noSaves.enabled = savesInfo.Length == 0;
+        }
+
+        // Resize the container and refresh the canvas scale to fit the new entries.
+        ResizeContainerMethod.Invoke(instance, null);
+        UpdateCanvasScaleMethod.Invoke(instance, null);
+    }
+
+    /// <summary>
+    /// Instantiates one save row, fills in its metadata, applies the thumbnail, and wires the action buttons.
+    /// </summary>
+    /// <param name="instance">The owning load menu.</param>
+    /// <param name="menuContext">The shared menu UI references used by every save row.</param>
+    /// <param name="savePath">The file or folder path for the save being represented.</param>
+    /// <param name="gameSave">The parsed save metadata to display.</param>
+    /// <param name="thumbnailBytes">The thumbnail image bytes to render on the row.</param>
+    private static void AddSaveEntry(
+        LoadGameMenu instance,
+        MenuContext menuContext,
+        string savePath,
+        GameSave gameSave,
+        byte[] thumbnailBytes)
+    {
+        if (gameSave == null) return;
+
+        // Spawn the entry prefab.
+        RectTransform newRect = UnityEngine.Object.Instantiate(menuContext.Prefab, menuContext.Container)
+            .GetComponent<RectTransform>();
+
+        // Fill in the name and day count.
+        newRect.Find("SaveName").GetComponent<Text>().text = gameSave.saveName;
+        newRect.Find("Day").GetComponent<Text>().text = "Day " + (gameSave.elapsedDays + 1);
+
+        // Show the thumbnail, if we have one.
+        ApplyThumbnail(newRect, thumbnailBytes);
+
+        // Each button gets exactly what it needs (save path, GameSave) directly.
+        newRect.gameObject.GetComponent<Button>().onClick.AddListener(() => OnEntryClicked(instance, savePath));
+        newRect.Find("DeleteButton").GetComponent<Button>().onClick.AddListener(() => OnEntryDeleteClicked(instance, savePath, gameSave));
+        newRect.Find("SettingsButton").GetComponent<Button>().onClick.AddListener(() => OnSettingsButtonClicked(instance, savePath, gameSave));
+
+        // Track the new entry like the original does.
+        menuContext.EntryRects.Add(newRect);
+    }
+
+    /// <summary>
+    /// Converts the save thumbnail bytes into a Unity Sprite and assigns it to the row's image component.
+    /// </summary>
+    /// <param name="entryRect">The save row whose thumbnail should be set.</param>
+    /// <param name="thumbnailBytes">The raw image bytes loaded from disk or from an archive.</param>
+    private static void ApplyThumbnail(RectTransform entryRect, byte[] thumbnailBytes)
+    {
+        if (thumbnailBytes == null) return;
+
+        var texture = new Texture2D(2, 2);
+        texture.LoadImage(thumbnailBytes);
+
+        Sprite sprite = Sprite.Create(texture, new Rect(0f, 0f, texture.width, texture.height), Vector2.zero, 100f);
+        entryRect.Find("Thumbnail").GetComponent<Image>().sprite = sprite;
+        entryRect.Find("Thumbnail/ThumbnailMissing").gameObject.SetActive(false);
+    }
+
+    #endregion
+
+
+    // Handles the actions triggered by a save row, including loading, deleting, and editing settings.
     
