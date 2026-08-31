@@ -451,4 +451,46 @@ public static class Utils
     {
         WriteSingleByteFileToZip(zipPath, entryName, TextToBytes(content));
     }
+
+    /// <summary>
+    /// Specifies the type of a file system path, indicating whether it is a file or a directory.
+    /// </summary>
+    public enum PathType
+    {
+        File,
+        Directory
+    }
+
+    /// <summary>
+    /// Determines whether the specified path is a file or a directory.
+    /// </summary>
+    /// <param name="path">The path to check.</param>
+    /// <returns>A <see cref="PathType"/> value indicating whether the path is a file or a directory.</returns>
+    /// <exception cref="ArgumentException">Thrown when the path is null or empty.</exception>
+    /// <exception cref="FileNotFoundException">Thrown when the path does not exist.</exception>
+    public static PathType GetPathType(string path)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            throw new ArgumentException("Path cannot be null or empty.", nameof(path));
+        }
+
+        if (File.Exists(path) || Directory.Exists(path))
+        {
+            FileAttributes attr = File.GetAttributes(path);
+
+            if (attr.HasFlag(FileAttributes.Directory))
+            {
+                return PathType.Directory;
+            }
+            else
+            {
+                return PathType.File;
+            }
+        }
+        else
+        {
+            throw new FileNotFoundException($"The specified path does not exist: {path}");
+        }
+    }
 }
