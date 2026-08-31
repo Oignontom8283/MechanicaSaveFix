@@ -34,17 +34,17 @@ public static class Patch_LoadGameMenu_Start
     private static readonly AccessTools.FieldRef<LoadGameMenu, Behaviour> NoSavesRef =
         AccessTools.FieldRefAccess<LoadGameMenu, Behaviour>("noSaves");
 
-    // private static readonly AccessTools.FieldRef<LoadGameMenu, bool> ChangingSettingsRef =
-    //     AccessTools.FieldRefAccess<LoadGameMenu, bool>("changingSettings");
+    private static readonly AccessTools.FieldRef<LoadGameMenu, bool> ChangingSettingsRef =
+        AccessTools.FieldRefAccess<LoadGameMenu, bool>("changingSettings");
 
-    // private static readonly AccessTools.FieldRef<LoadGameMenu, GameSave> SaveToChangeRef =
-    //     AccessTools.FieldRefAccess<LoadGameMenu, GameSave>("saveToChange");
+    private static readonly AccessTools.FieldRef<LoadGameMenu, GameSave> SaveToChangeRef =
+        AccessTools.FieldRefAccess<LoadGameMenu, GameSave>("saveToChange");
 
     private static readonly AccessTools.FieldRef<LoadGameMenu, RectTransform> DeleteConfirmDisplayRef =
         AccessTools.FieldRefAccess<LoadGameMenu, RectTransform>("deleteConfirmDisplay");
 
-    // private static readonly AccessTools.FieldRef<LoadGameMenu, RectTransform> SettingsContainerRef =
-    //     AccessTools.FieldRefAccess<LoadGameMenu, RectTransform>("settingsContainer");
+    private static readonly AccessTools.FieldRef<LoadGameMenu, RectTransform> SettingsContainerRef =
+        AccessTools.FieldRefAccess<LoadGameMenu, RectTransform>("settingsContainer");
 
     private static readonly AccessTools.FieldRef<LoadGameMenu, DifficultySettingsScreen> DifficultySettingsScreenRef =
         AccessTools.FieldRefAccess<LoadGameMenu, DifficultySettingsScreen>("difficultySettingsScreen");
@@ -104,6 +104,9 @@ public static class Patch_LoadGameMenu_Start
     /// <returns>Always false so the original Start method is skipped.</returns>
     static bool Prefix(LoadGameMenu __instance)
     {
+        ConfirmationPopup.Bind(DeleteConfirmDisplayRef(__instance));
+        SettingsScreenController.Bind(SettingsContainerRef(__instance), DifficultySettingsScreenRef(__instance));
+
         // Link the confirmation popup to the game's existing popup UI.
         ConfirmationPopup.Bind(DeleteConfirmDisplayRef(__instance));
 
