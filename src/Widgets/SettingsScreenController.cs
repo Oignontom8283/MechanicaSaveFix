@@ -75,6 +75,7 @@ public static class SettingsScreenController
     private static void Close()
     {
         _container.SetActive(false);
+        IsOpen = false;
         _onSubmit = null;
         _onCancel = null;
     }
