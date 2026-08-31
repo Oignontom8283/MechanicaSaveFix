@@ -68,4 +68,31 @@ public static class Patch_LoadGameMenu_Start
 
 
     // Holds the shared save-menu UI references that are reused for every generated entry.
+    #region Menu-wide context
+
+    // Holds the UI references shared by every save entry (prefab, container, list).
+    private readonly struct MenuContext
+    {
+        public readonly GameObject Prefab;
+        public readonly Transform Container;
+        public readonly List<RectTransform> EntryRects;
+
+        public MenuContext(GameObject prefab, Transform container, List<RectTransform> entryRects)
+        {
+            Prefab = prefab;
+            Container = container;
+            EntryRects = entryRects;
+        }
+    }
+
+    // Reads the shared UI references once.
+    private static MenuContext GetMenuContext(LoadGameMenu instance) => new MenuContext(
+        prefab: SaveEntryPrefabRef(instance),
+        container: EntryContainerRef(instance),
+        entryRects: EntryRectsRef(instance));
+
+    #endregion
+
+
+    // Runs when the save menu starts, rebuilds the list, and keeps the menu aligned with the current screen scale.
     
