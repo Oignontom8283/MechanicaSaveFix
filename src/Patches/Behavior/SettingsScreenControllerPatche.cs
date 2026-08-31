@@ -7,6 +7,16 @@ public static class Patch_LoadGameMenu_CancelSettingsChange
     static bool Prefix()
     {
         SettingsScreenController.Cancel();
-        return false; // skip the original, which only touched fields we no longer use
+        return false;
+    }
+}
+
+[HarmonyPatch(typeof(LoadGameMenu), "SubmitSettingsChange")]
+public static class Patch_LoadGameMenu_SubmitSettingsChange
+{
+    static bool Prefix()
+    {
+        SettingsScreenController.Submit();
+        return false;
     }
 }
