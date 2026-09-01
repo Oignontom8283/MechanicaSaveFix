@@ -7,39 +7,50 @@ using HarmonyLib;
 [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.LoadSave))]
 public static class Patch_SaveManager_LoadSave
 {
-    static void Prefix(string saveFolderPath)
+    static void Prefix(string savePath)
     {
+        bool isArchive =  Utils.GetPathType(savePath) == Utils.PathType.File;
+        
+        // Check if the save folder or archive exists
+        if (isArchive)
+        {
+            if (!File.Exists(savePath))
+                throw new FileNotFoundException($"Save archive file not found at \"{savePath}\".");
+        }
+        else
+        {
+            if (!Directory.Exists(savePath))
+                throw new DirectoryNotFoundException($"Save folder not found at \"{savePath}\".");
+        }
 
-        string saveArchivePath = Path.ChangeExtension(saveFolderPath, ".msa");
-        bool isExistArchive = File.Exists(saveArchivePath);
-
+        // Initialize the virtual file system
         if (VirtualFS.IsInitialized())
         {
             MechanicaSaveFix.Log.LogWarning("VirtualFS was already initialized on world load, force-deinitialized.");
             VirtualFS.Deinitialize();
         }
-        VirtualFS.Initialize(saveFolderPath);
+        VirtualFS.Initialize(savePath);
         MechanicaSaveFix.Log.LogMessage($"VirtualFS initialized!");
         
-        MechanicaSaveFix.Log.LogInfo($"Save root path: {saveFolderPath}");
-        MechanicaSaveFix.Log.LogInfo($"Save archive finded? - {isExistArchive} at \"{saveArchivePath}\".");
+        MechanicaSaveFix.Log.LogInfo($"Save type: {(isArchive ? "Archive" : "Folder")} at \"{savePath}\".");
         
+        // Load the save files into the virtual file system
         int loadedFiles = 0;
-        if (isExistArchive)
+        if (isArchive)
         {
             MechanicaSaveFix.Log.LogInfo($"Loading save archive...");
-            loadedFiles = VirtualFS.LoadZipFromDisk(saveArchivePath);
+            loadedFiles = VirtualFS.LoadZipFromDisk(savePath);
         }
         else
         {
             MechanicaSaveFix.Log.LogInfo($"Loading save folder...");
-            loadedFiles = VirtualFS.LoadFolderFromDisk(saveFolderPath);
+            loadedFiles = VirtualFS.LoadFolderFromDisk(savePath);
         }
         MechanicaSaveFix.Log.LogMessage($"Finished loading {loadedFiles} files.");
 
         // PLayback the world
         VirtualFS.StartIntercepting();
-        MechanicaSaveFix.Log.LogInfo($"Start world I/O intercepting.");
+        MechanicaSaveFix.Log.LogMessage($"Start world I/O intercepting.");
     }
 }
 
