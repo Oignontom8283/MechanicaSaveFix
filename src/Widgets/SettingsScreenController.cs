@@ -18,7 +18,9 @@ public static class SettingsScreenController
 
     public static bool IsOpen { get; private set; }
 
-    /// <summary>Binds to the game's existing settings container and screen. Call once.</summary>
+    /// <summary>
+    /// Binds to the game's existing settings container and screen. Call once.
+    /// </summary>
     public static void Bind(GameObject settingsContainer, DifficultySettingsScreen difficultyScreen)
     {
         if (_container != null) return;
@@ -26,7 +28,7 @@ public static class SettingsScreenController
         _container = settingsContainer;
         _screen = difficultyScreen;
 
-        _container.SetActive(false); // plus de .gameObject devant, GameObject a directement SetActive
+        _container.SetActive(false);
     }
 
     /// <summary>
@@ -37,7 +39,7 @@ public static class SettingsScreenController
     {
         if (save.treeRegenRate_NEW == 0f)
         {
-            save.treeRegenRate_NEW = 1f; // fix up an old/missing value before displaying
+            save.treeRegenRate_NEW = 1f;
         }
 
         _screen.ResetAllValues();
@@ -50,7 +52,9 @@ public static class SettingsScreenController
         IsOpen = true;
     }
 
-    /// <summary>Reads the screen's current values and hands them to onSubmit, then closes.</summary>
+    /// <summary>
+    /// Reads the screen's current values and hands them to onSubmit, then closes.
+    /// </summary>
     public static void Submit()
     {
         if (!IsOpen) return;
@@ -62,7 +66,9 @@ public static class SettingsScreenController
         onSubmit?.Invoke(edited);
     }
 
-    /// <summary>Closes without calling onSubmit.</summary>
+    /// <summary>
+    /// Closes without calling onSubmit.
+    /// </summary>
     public static void Cancel()
     {
         if (!IsOpen) return;

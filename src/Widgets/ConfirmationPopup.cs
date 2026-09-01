@@ -45,7 +45,7 @@ public static class ConfirmationPopup
             cancel?.Invoke();
         });
 
-        _display.gameObject.SetActive(false); // état initial propre
+        _display.gameObject.SetActive(false);
     }
 
     /// <summary>
@@ -77,7 +77,9 @@ public static class ConfirmationPopup
         _onCancel = null;
     }
 
-    /// <summary>Called from Update's Escape-key handling if a popup is open.</summary>
+    /// <summary>
+    /// Called from Update's Escape-key handling if a popup is open.
+    /// </summary>
     public static void CancelIfOpen()
     {
         if (!IsOpen) return;
@@ -86,7 +88,9 @@ public static class ConfirmationPopup
         cancel?.Invoke();
     }
 
-    /// <summary>Called from Update's Delete-key handling if a popup is open (shortcut for confirm).</summary>
+    /// <summary>
+    /// Called from Update's Delete-key handling if a popup is open (shortcut for confirm).
+    /// </summary>
     public static void ConfirmIfOpen()
     {
         if (!IsOpen) return;
