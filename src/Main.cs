@@ -1,4 +1,5 @@
 using BepInEx;
+using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
 
@@ -27,4 +28,11 @@ public class MechanicaSaveFix : BaseUnityPlugin
         // Apply Harmony patches
         harmony.PatchAll();
     }
+
+    private ConfigEntry<string> archiveExtension; // .msa
+    private ConfigEntry<string> backupFolderName; // ../../SaveBackups or BackupsSave or Backups
+    private ConfigEntry<bool> backupEnabled; // true
+    private ConfigEntry<bool> displayArchiveSave; // true
+    private ConfigEntry<bool> displayLegacySave; // true
+    private ConfigEntry<bool> deleteNewSaveFolderArtifacts; // true
 }
