@@ -31,12 +31,12 @@ public class MechanicaSaveFix : BaseUnityPlugin
         harmony.PatchAll();
     }
 
-    private ConfigEntry<string> archiveExtension;
-    private ConfigEntry<string> backupFolderName;
-    private ConfigEntry<bool> backupEnabled;
-    private ConfigEntry<bool> displayArchiveSave;
-    private ConfigEntry<bool> displayLegacySave;
-    private ConfigEntry<bool> deleteNewSaveFolderArtifacts;
+    public static ConfigEntry<string> archiveExtension;
+    public static ConfigEntry<string> backupFolderName;
+    public static ConfigEntry<bool> backupEnabled;
+    public static ConfigEntry<bool> displayArchiveSave;
+    public static ConfigEntry<bool> displayLegacySave;
+    public static ConfigEntry<bool> deleteNewSaveFolderArtifacts;
 
     /// <summary>
     /// Binds configuration settings for the plugin.
