@@ -2,6 +2,7 @@ using System.Collections;
 using System.IO;
 using Game.Saving;
 using HarmonyLib;
+using UnityEngine;
 
 [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.Save))]
 public static class Patch_SaveManager_Save
@@ -14,7 +15,7 @@ public static class Patch_SaveManager_Save
         string savePath = SavePathRef(instance);
 
         string saveArchivePath = Path.ChangeExtension(savePath, MechanicaSaveFix.archiveExtension.Value);
-        string saveBackupPath = Path.Combine(savePath, "../../SaveBackups");
+        string saveBackupPath = Path.Combine(Application.persistentDataPath, MechanicaSaveFix.backupFolderName.Value);
 
         if (!VirtualFS.IsInitialized())
         {
