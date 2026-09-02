@@ -34,9 +34,11 @@ public class MechanicaSaveFix : BaseUnityPlugin
     public static ConfigEntry<string> archiveExtension;
     public static ConfigEntry<string> backupFolderName;
     public static ConfigEntry<bool> backupEnabled;
+    public static ConfigEntry<bool> deleteNewSaveFolderArtifacts;
+    public static ConfigEntry<string> saveFileNameThumbnail;
+    public static ConfigEntry<string> saveFileNameSaveinfo;
     public static ConfigEntry<bool> displayArchiveSave;
     public static ConfigEntry<bool> displayLegacySave;
-    public static ConfigEntry<bool> deleteNewSaveFolderArtifacts;
 
     /// <summary>
     /// Binds configuration settings for the plugin.
@@ -45,13 +47,15 @@ public class MechanicaSaveFix : BaseUnityPlugin
     {
         Config.SaveOnConfigSet = false;
 
-        //                                          Section,  Key,                          Default value,  Description
-        archiveExtension             = Config.Bind( "Save",  "Extension",                   ".msa",         "The file extension for the save archive format."                  );
-        backupFolderName             = Config.Bind( "Save",  "BackupFolderPath",            "./Backups/",   "The path of the folder where backups will be stored."             );
-        backupEnabled                = Config.Bind( "Save",  "BackupEnabled",                true,          "Whether to create backups of save files before overwriting them." );
-        deleteNewSaveFolderArtifacts = Config.Bind( "Save",  "DeleteNewSaveFolderArtifacts", true,          "Whether to delete artifacts from the new save folder."            );
-        displayArchiveSave           = Config.Bind( "UI",    "DisplayArchiveSave",           true,          "Whether to display the archive save option in the save menu."     );
-        displayLegacySave            = Config.Bind( "UI",    "DisplayLegacySave",            true,          "Whether to display the legacy save option in the save menu."      );
+        //                                          Section,  Key,                          Default value,    Description
+        archiveExtension             = Config.Bind( "Save",  "Extension",                   ".msa",           "The file extension for the save archive format."                  );
+        backupFolderName             = Config.Bind( "Save",  "BackupFolderPath",            "./Backups/",     "The path of the folder where backups will be stored."             );
+        backupEnabled                = Config.Bind( "Save",  "BackupEnabled",                true,            "Whether to create backups of save files before overwriting them." );
+        deleteNewSaveFolderArtifacts = Config.Bind( "Save",  "DeleteNewSaveFolderArtifacts", true,            "Whether to delete artifacts from the new save folder."            );
+        saveFileNameThumbnail        = Config.Bind( "Save",  "ThumbnailFileName",            "thumbnail.jpg", "The name of the thumbnail file within each save."                 );
+        saveFileNameSaveinfo         = Config.Bind( "Save",  "SaveinfoFileName",             "saveinfo.txt",  "The name of the info file within each save."                      );
+        displayArchiveSave           = Config.Bind( "UI",    "DisplayArchiveSave",           true,            "Whether to display the archive save option in the save menu."     );
+        displayLegacySave            = Config.Bind( "UI",    "DisplayLegacySave",            true,            "Whether to display the legacy save option in the save menu."      );
 
         Config.Save();
         Config.SaveOnConfigSet = true;
