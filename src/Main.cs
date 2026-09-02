@@ -29,10 +29,26 @@ public class MechanicaSaveFix : BaseUnityPlugin
         harmony.PatchAll();
     }
 
-    private ConfigEntry<string> archiveExtension; // .msa
-    private ConfigEntry<string> backupFolderName; // ../../SaveBackups or BackupsSave or Backups
-    private ConfigEntry<bool> backupEnabled; // true
-    private ConfigEntry<bool> displayArchiveSave; // true
-    private ConfigEntry<bool> displayLegacySave; // true
-    private ConfigEntry<bool> deleteNewSaveFolderArtifacts; // true
+    private ConfigEntry<string> archiveExtension;
+    private ConfigEntry<string> backupFolderName;
+    private ConfigEntry<bool> backupEnabled;
+    private ConfigEntry<bool> displayArchiveSave;
+    private ConfigEntry<bool> displayLegacySave;
+    private ConfigEntry<bool> deleteNewSaveFolderArtifacts;
+
+    private void ConfigBind()
+    {
+        Config.SaveOnConfigSet = false;
+
+        //                                          Section,  Key,                          Default value,  Description
+        archiveExtension             = Config.Bind( "Save",  "Extension",                   ".msa",         "The file extension for the save archive format."                  );
+        backupFolderName             = Config.Bind( "Save",  "BackupFolderPath",            "./Backups/",   "The path of the folder where backups will be stored."             );
+        backupEnabled                = Config.Bind( "Save",  "BackupEnabled",                true,          "Whether to create backups of save files before overwriting them." );
+        deleteNewSaveFolderArtifacts = Config.Bind( "Save",  "DeleteNewSaveFolderArtifacts", true,          "Whether to delete artifacts from the new save folder."            );
+        displayArchiveSave           = Config.Bind( "UI",    "DisplayArchiveSave",           true,          "Whether to display the archive save option in the save menu."     );
+        displayLegacySave            = Config.Bind( "UI",    "DisplayLegacySave",            true,          "Whether to display the legacy save option in the save menu."      );
+
+        Config.Save();
+        Config.SaveOnConfigSet = true;
+    }
 }
