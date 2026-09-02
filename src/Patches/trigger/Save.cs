@@ -13,7 +13,7 @@ public static class Patch_SaveManager_Save
     {
         string savePath = SavePathRef(instance);
 
-        string saveArchivePath = Path.ChangeExtension(savePath, ".msa");
+        string saveArchivePath = Path.ChangeExtension(savePath, MechanicaSaveFix.archiveExtension.Value);
         string saveBackupPath = Path.Combine(savePath, "../../SaveBackups");
 
         if (!VirtualFS.IsInitialized())

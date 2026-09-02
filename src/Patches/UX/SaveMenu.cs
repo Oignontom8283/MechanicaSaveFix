@@ -196,7 +196,7 @@ public static class Patch_LoadGameMenu_Start
         }
 
         // Archived saves: read saveinfo and thumbnail from inside the .msa zip.
-        foreach (string saveArchivePath in Directory.GetFiles(savesPath, "*.msa"))
+        foreach (string saveArchivePath in Directory.GetFiles(savesPath, $"*{MechanicaSaveFix.archiveExtension.Value}"))
         {
             string saveInfoText = Utils.ReadSingleTextFileFromZip(saveArchivePath, "saveinfo.txt");
             if (saveInfoText == null)
