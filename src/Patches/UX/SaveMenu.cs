@@ -162,7 +162,7 @@ public static class Patch_LoadGameMenu_Start
     /// <returns>An array containing each save path and its parsed GameSave data together with its thumbnail bytes.</returns>
     private static (string SavePath, GameSave GameSave, byte[] ThumbnailBytes)[] GetSavesInfo()
     {
-        string savesPath = Singleton<SaveManager>.Instance.pGameSavesFolderPath;
+        string savesPath = GameContext.savesFolderPath;
 
         if (!Directory.Exists(savesPath))
         {
