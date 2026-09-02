@@ -19,6 +19,8 @@ public class MechanicaSaveFix : BaseUnityPlugin
     private void Awake()
     {
         Log = Logger; // Set the logger for this plugin
+        ConfigBind(); // Bind configuration settings
+
         Log.LogInfo(" ");
         Log.LogInfo($" {MOD_NAME} initialized!");
         Log.LogInfo($"   v{MOD_VERSION} - {MOD_COMMIT_HASH[..12]}");
@@ -36,6 +38,9 @@ public class MechanicaSaveFix : BaseUnityPlugin
     private ConfigEntry<bool> displayLegacySave;
     private ConfigEntry<bool> deleteNewSaveFolderArtifacts;
 
+    /// <summary>
+    /// Binds configuration settings for the plugin.
+    /// </summary>
     private void ConfigBind()
     {
         Config.SaveOnConfigSet = false;
