@@ -50,7 +50,7 @@ public class MechanicaSaveFix : BaseUnityPlugin
         //                                          Section,  Key,                          Default value,    Description
         archiveExtension             = Config.Bind( "Save",  "Extension",                   ".msa",           "The file extension for the save archive format."                  ); // yes
         backupFolderName             = Config.Bind( "Save",  "BackupFolderPath",            "./Backups/",     "The path of the folder where backups will be stored."             ); // yes
-        backupEnabled                = Config.Bind( "Save",  "BackupEnabled",                true,            "Whether to create backups of save files before overwriting them." ); // no
+        backupEnabled                = Config.Bind( "Save",  "BackupEnabled",                true,            "Whether to create backups of save files before overwriting them." ); // yes
         deleteNewSaveFolderArtifacts = Config.Bind( "Save",  "DeleteNewSaveFolderArtifacts", true,            "Whether to delete artifacts from the new save folder."            ); // no
         saveFileNameThumbnail        = Config.Bind( "Save",  "ThumbnailFileName",            "thumbnail.jpg", "The name of the thumbnail file within each save."                 ); // yes
         saveFileNameSaveinfo         = Config.Bind( "Save",  "SaveinfoFileName",             "saveinfo.txt",  "The name of the info file within each save."                      ); // yes

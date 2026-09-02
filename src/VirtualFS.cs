@@ -576,31 +576,40 @@ public static class VirtualFS
         // Back up the existing save file, if any.
         if (File.Exists(finalZipPath))
         {
-            Directory.CreateDirectory(backupFolder);
+            if (!MechanicaSaveFix.backupEnabled.Value)
+            {
+                MechanicaSaveFix.Log.LogDebug($"Backup is disabled. Old save file \"{finalZipPath}\" will be deleted without backup.");
 
-            string backupPath = Path.Combine(backupFolder, Path.GetFileName(finalZipPath));
-
-            if (File.Exists(backupPath))
-            {   
-                oldBackupDeleted = true;
-
-                // Delete the old backup if it already exists.
-                File.Delete(backupPath);
-                MechanicaSaveFix.Log.LogDebug($"Old backup archive file \"{backupPath}\" already existed and was deleted.");
+                File.Delete(finalZipPath);
             }
             else
             {
-                // Do nothing if no previous backup exists.
-                MechanicaSaveFix.Log.LogDebug($"No previous backup archive file found at \"{backupPath}\".");
-            }
+                Directory.CreateDirectory(backupFolder);
 
-            File.Move(finalZipPath, backupPath);
-            if (!Utils.VerifyFileValid(backupPath)) // Verify that the backup file was created successfully.
-            {
-                throw new IOException($"VirtualFS.CommitArchive: Failed to create backup archive: {backupPath}");
-            }
+                string backupPath = Path.Combine(backupFolder, Path.GetFileName(finalZipPath));
 
-            backupCreated = true;
+                if (File.Exists(backupPath))
+                {   
+                    oldBackupDeleted = true;
+
+                    // Delete the old backup if it already exists.
+                    File.Delete(backupPath);
+                    MechanicaSaveFix.Log.LogDebug($"Old backup archive file \"{backupPath}\" already existed and was deleted.");
+                }
+                else
+                {
+                    // Do nothing if no previous backup exists.
+                    MechanicaSaveFix.Log.LogDebug($"No previous backup archive file found at \"{backupPath}\".");
+                }
+
+                File.Move(finalZipPath, backupPath);
+                if (!Utils.VerifyFileValid(backupPath)) // Verify that the backup file was created successfully.
+                {
+                    throw new IOException($"VirtualFS.CommitArchive: Failed to create backup archive: {backupPath}");
+                }
+
+                backupCreated = true;
+            }
         }
 
         File.Move(tempPath, finalZipPath);
