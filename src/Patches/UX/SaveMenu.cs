@@ -160,7 +160,7 @@ public static class Patch_LoadGameMenu_Start
     /// Any save that fails to read is skipped and logged, without affecting the others.
     /// </summary>
     /// <returns>An array containing each save path and its parsed GameSave data together with its thumbnail bytes.</returns>
-    private static (string SavePath, GameSave GameSave, byte[] ThumbnailBytes)[] GetSavesInfo()
+    private static (string SavePath, GameSave GameSave, byte[] ThumbnailBytes)[] GetSavesInfo(bool includeLegacy, bool includeArchives)
     {
         string savesPath = Utils.GameContext.savesFolderPath;
 
@@ -171,50 +171,56 @@ public static class Patch_LoadGameMenu_Start
 
         var savesInfo = new List<(string, GameSave, byte[])>();
 
-        // Legacy saves: read saveinfo and thumbnail straight from the folder.
-        foreach (string saveFolderPath in Directory.GetDirectories(savesPath))
+        if (includeLegacy)
         {
-            string saveInfoPath = Path.Combine(saveFolderPath, MechanicaSaveFix.saveFileNameSaveinfo.Value);
-            string thumbnailPath = Path.Combine(saveFolderPath, MechanicaSaveFix.saveFileNameThumbnail.Value);
-
-            if (!File.Exists(saveInfoPath))
+            // Legacy saves: read saveinfo and thumbnail straight from the folder.
+            foreach (string saveFolderPath in Directory.GetDirectories(savesPath))
             {
-                MechanicaSaveFix.Log.LogWarning($"No {MechanicaSaveFix.saveFileNameSaveinfo.Value} found in \"{saveFolderPath}\". Skipping.");
-                continue;
-            }
+                string saveInfoPath = Path.Combine(saveFolderPath, MechanicaSaveFix.saveFileNameSaveinfo.Value);
+                string thumbnailPath = Path.Combine(saveFolderPath, MechanicaSaveFix.saveFileNameThumbnail.Value);
 
-            GameSave gameSave = Utils.FromJsonOrNull<GameSave>(File.ReadAllText(saveInfoPath));
-            if (gameSave == null)
-            {
-                MechanicaSaveFix.Log.LogWarning($"Failed to parse {MechanicaSaveFix.saveFileNameSaveinfo.Value} in \"{saveFolderPath}\". Skipping.");
-                continue;
-            }
+                if (!File.Exists(saveInfoPath))
+                {
+                    MechanicaSaveFix.Log.LogWarning($"No {MechanicaSaveFix.saveFileNameSaveinfo.Value} found in \"{saveFolderPath}\". Skipping.");
+                    continue;
+                }
 
-            byte[] thumbnailBytes = File.Exists(thumbnailPath) ? File.ReadAllBytes(thumbnailPath) : null;
+                GameSave gameSave = Utils.FromJsonOrNull<GameSave>(File.ReadAllText(saveInfoPath));
+                if (gameSave == null)
+                {
+                    MechanicaSaveFix.Log.LogWarning($"Failed to parse {MechanicaSaveFix.saveFileNameSaveinfo.Value} in \"{saveFolderPath}\". Skipping.");
+                    continue;
+                }
 
-            savesInfo.Add((saveFolderPath, gameSave, thumbnailBytes));
+                byte[] thumbnailBytes = File.Exists(thumbnailPath) ? File.ReadAllBytes(thumbnailPath) : null;
+
+                savesInfo.Add((saveFolderPath, gameSave, thumbnailBytes));
+            }            
         }
 
-        // Archived saves: read saveinfo and thumbnail from inside the .msa zip.
-        foreach (string saveArchivePath in Directory.GetFiles(savesPath, $"*{MechanicaSaveFix.archiveExtension.Value}"))
-        {
-            string saveInfoText = Utils.ReadSingleTextFileFromZip(saveArchivePath, MechanicaSaveFix.saveFileNameSaveinfo.Value);
-            if (saveInfoText == null)
+        if (includeArchives)
+        {            
+            // Archived saves: read saveinfo and thumbnail from inside the .msa zip.
+            foreach (string saveArchivePath in Directory.GetFiles(savesPath, $"*{MechanicaSaveFix.archiveExtension.Value}"))
             {
-                MechanicaSaveFix.Log.LogWarning($"No {MechanicaSaveFix.saveFileNameSaveinfo.Value} found inside archive \"{saveArchivePath}\". Skipping.");
-                continue;
+                string saveInfoText = Utils.ReadSingleTextFileFromZip(saveArchivePath, MechanicaSaveFix.saveFileNameSaveinfo.Value);
+                if (saveInfoText == null)
+                {
+                    MechanicaSaveFix.Log.LogWarning($"No {MechanicaSaveFix.saveFileNameSaveinfo.Value} found inside archive \"{saveArchivePath}\". Skipping.");
+                    continue;
+                }
+
+                GameSave gameSave = Utils.FromJsonOrNull<GameSave>(saveInfoText);
+                if (gameSave == null)
+                {
+                    MechanicaSaveFix.Log.LogWarning($"Failed to parse {MechanicaSaveFix.saveFileNameSaveinfo.Value} inside archive \"{saveArchivePath}\". Skipping.");
+                    continue;
+                }
+
+                byte[] thumbnailBytes = Utils.ReadSingleByteFileFromZip(saveArchivePath, MechanicaSaveFix.saveFileNameThumbnail.Value);
+
+                savesInfo.Add((saveArchivePath, gameSave, thumbnailBytes));
             }
-
-            GameSave gameSave = Utils.FromJsonOrNull<GameSave>(saveInfoText);
-            if (gameSave == null)
-            {
-                MechanicaSaveFix.Log.LogWarning($"Failed to parse {MechanicaSaveFix.saveFileNameSaveinfo.Value} inside archive \"{saveArchivePath}\". Skipping.");
-                continue;
-            }
-
-            byte[] thumbnailBytes = Utils.ReadSingleByteFileFromZip(saveArchivePath, MechanicaSaveFix.saveFileNameThumbnail.Value);
-
-            savesInfo.Add((saveArchivePath, gameSave, thumbnailBytes));
         }
 
         return savesInfo.ToArray();
@@ -228,7 +234,10 @@ public static class Patch_LoadGameMenu_Start
 
     private static void RebuildSaveEntries(LoadGameMenu instance)
     {
-        var savesInfo = GetSavesInfo();
+        var savesInfo = GetSavesInfo(
+            includeLegacy: MechanicaSaveFix.displayLegacySave.Value,
+            includeArchives: MechanicaSaveFix.displayArchiveSave.Value
+        );
 
         RemoveAllSaveEntries(instance); // notre propre nettoyage, remplace RemoveSaveEntriesMethod.Invoke
 
