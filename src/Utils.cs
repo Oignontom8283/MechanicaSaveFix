@@ -4,10 +4,19 @@ using System.IO;
 using System.IO.Compression;
 using System.Text;
 using System.Text.RegularExpressions;
+using Game.Saving;
+using Game.Utilities;
 using UnityEngine;
 
 public static class Utils
 {
+    /// <summary>
+    /// Provides access to the current game context.
+    /// </summary>
+    public static class GameContext
+    {
+        public static string savesFolderPath => Singleton<SaveManager>.Instance.pGameSavesFolderPath;
+    }
 
     /// <summary>
     /// Checks if a target path (file or directory) is located inside a parent directory.
