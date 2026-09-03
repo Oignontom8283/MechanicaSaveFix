@@ -1,3 +1,4 @@
+using System.IO;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
@@ -15,10 +16,12 @@ public class MechanicaSaveFix : BaseUnityPlugin
 
     internal static ManualLogSource Log;
     private readonly Harmony harmony = new Harmony(MOD_GUID);
+    private new ConfigFile Config;
 
     private void Awake()
     {
         Log = Logger; // Set the logger for this plugin
+        Config = new ConfigFile(Path.Combine(Paths.ConfigPath, $"{MOD_NAME}.cfg"), true); // Set the configuration file for this plugin
         ConfigBind(); // Bind configuration settings
 
         Log.LogInfo(" ");
