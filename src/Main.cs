@@ -57,8 +57,8 @@ public class MechanicaSaveFix : BaseUnityPlugin
         deleteNewSaveFolderArtifacts = Config.Bind( "Save",  "DeleteNewSaveFolderArtifacts", true,            "Whether to delete artifacts from the new save folder."            ); // no
         saveFileNameThumbnail        = Config.Bind( "Save",  "ThumbnailFileName",            "thumbnail.jpg", "The name of the thumbnail file within each save."                 ); // yes
         saveFileNameSaveinfo         = Config.Bind( "Save",  "SaveinfoFileName",             "saveinfo.txt",  "The name of the info file within each save."                      ); // yes
-        displayArchiveSave           = Config.Bind( "UI",    "DisplayArchiveSave",           true,            "Whether to display the archive save option in the save menu."     ); // no
-        displayLegacySave            = Config.Bind( "UI",    "DisplayLegacySave",            true,            "Whether to display the legacy save option in the save menu."      ); // no
+        displayArchiveSave           = Config.Bind( "UI",    "DisplayArchiveSave",           true,            "Whether to display the archive save option in the save menu."     ); // yes
+        displayLegacySave            = Config.Bind( "UI",    "DisplayLegacySave",            true,            "Whether to display the legacy save option in the save menu."      ); // yes
 
         Config.Save();
         Config.SaveOnConfigSet = true;
