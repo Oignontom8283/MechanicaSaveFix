@@ -463,6 +463,47 @@ public static class Utils
     }
 
     /// <summary>
+    /// Creates a new zip archive at the given path, populated with the provided entries.
+    /// Overwrites the file if it already exists.
+    /// </summary>
+    /// <param name="zipPath">The path where the archive will be created.</param>
+    /// <param name="entries">The entry name/content pairs to write into the archive.</param>
+    public static void CreateArchiveWithDefaults(string zipPath, IReadOnlyDictionary<string, byte[]> entries)
+    {
+        using (var zipStream = new FileStream(zipPath, FileMode.Create, FileAccess.Write))
+        using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Create))
+        {
+            foreach (var kvp in entries)
+            {
+                string sanitizedEntryName = SanitizePath(kvp.Key);
+                ZipArchiveEntry entry = archive.CreateEntry(sanitizedEntryName, CompressionLevel.Optimal);
+
+                using (var entryStream = entry.Open())
+                {
+                    entryStream.Write(kvp.Value, 0, kvp.Value.Length);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Same as <see cref="CreateArchiveWithDefaults(string, IReadOnlyDictionary{string, byte[]})"/>,
+    /// but for text entries, encoded as UTF-8.
+    /// </summary>
+    /// <param name="zipPath">The path where the archive will be created.</param>
+    /// <param name="entries">The entry name/content pairs to write into the archive.</param>
+    public static void CreateArchiveWithDefaults(string zipPath, IReadOnlyDictionary<string, string> entries)
+    {
+        var byteEntries = new Dictionary<string, byte[]>();
+        foreach (var kvp in entries)
+        {
+            byteEntries[kvp.Key] = TextToBytes(kvp.Value);
+        }
+
+        CreateArchiveWithDefaults(zipPath, byteEntries);
+    }
+
+    /// <summary>
     /// Specifies the type of a file system path, indicating whether it is a file or a directory.
     /// </summary>
     public enum PathType
