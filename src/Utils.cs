@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
@@ -501,5 +502,38 @@ public static class Utils
         {
             throw new FileNotFoundException($"The specified path does not exist: {path}");
         }
+    }
+
+    /// <summary>
+    /// Returns a name that doesn't appear in <paramref name="existingNames"/>, derived from
+    /// <paramref name="desiredName"/>. If the desired name (after stripping any existing "_N"
+    /// suffix) is already free, it's returned as-is. Otherwise, "_1", "_2", etc. are appended
+    /// until a free name is found.
+    /// </summary>
+    /// <param name="desiredName">The name to start from.</param>
+    /// <param name="existingNames">The names already taken.</param>
+    /// <returns>A name not present in <paramref name="existingNames"/>.</returns>
+    public static string MakeUniqueName(string desiredName, IEnumerable<string> existingNames)
+    {
+        var taken = new HashSet<string>(existingNames, StringComparer.Ordinal);
+
+        // Strip an existing "_N" suffix (N can be negative or zero) to get the base name.
+        string baseName = Regex.Replace(desiredName, @"_-?\d+$", "");
+
+        if (!taken.Contains(baseName))
+        {
+            return baseName;
+        }
+
+        int suffix = 1;
+        string candidate;
+        do
+        {
+            candidate = $"{baseName}_{suffix}";
+            suffix++;
+        }
+        while (taken.Contains(candidate));
+
+        return candidate;
     }
 }
