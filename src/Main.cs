@@ -7,7 +7,6 @@ using HarmonyLib;
 [BepInPlugin(MOD_GUID, MOD_NAME, MOD_VERSION)]
 public class MechanicaSaveFix : BaseUnityPlugin
 {    
-
     public const string MOD_GUID = "com.oignontom8283.savefix";
     public const string MOD_NAME = nameof(MechanicaSaveFix);
     public const string MOD_VERSION = BuildInfo.Version;
@@ -50,6 +49,14 @@ public class MechanicaSaveFix : BaseUnityPlugin
     {
         Config.SaveOnConfigSet = false;
 
+        string configHeader = $"{MOD_NAME} v{MOD_VERSION} Configuration!\n" +
+                              "--------------------------------\n" +
+                              $"This configuration file allows you to customize the behavior of the {MOD_NAME} plugin.\n" +
+                              "You can modify the settings below to suit your preferences.\n" +
+                              "\n" +
+                              "Changing certain settings could cause the game to malfunction. Only modify what you understand.\n" +
+                              "--------------------------------";
+
         //                                   Section, Key,                  Default value,   Description
         archiveExtension      = Config.Bind( "Save",  "Extension",          ".msa",          "The file extension for the save archive format."                  ); // yes
         backupFolderName      = Config.Bind( "Save",  "BackupFolderPath",   "./Backups/",    "The path of the folder where backups will be stored."             ); // yes
@@ -61,5 +68,21 @@ public class MechanicaSaveFix : BaseUnityPlugin
 
         Config.Save();
         Config.SaveOnConfigSet = true;
+
+        
+        // Add a header to the configuration file
+        string prefixLine = "# ";
+
+        if (!File.Exists(Config.ConfigFilePath))
+            return;
+
+        string fileContent = File.ReadAllText(Config.ConfigFilePath);
+
+        // Add a header to the configuration file
+        string headerContent = prefixLine + configHeader.Replace("\n", "\n" + prefixLine);
+        string newFileContent = headerContent + "\n\n" + fileContent;
+
+        // Write the modified content back to the configuration file
+        File.WriteAllText(Config.ConfigFilePath, newFileContent);
     }
 }
