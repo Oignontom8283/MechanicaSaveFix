@@ -438,23 +438,12 @@ public static class VirtualFS
         RequiredMode(Mode.Idle, nameof(WriteZipToDisk));
         RequireNotEmpty(nameof(WriteZipToDisk));
 
-        using (var zipStream = new FileStream(zipPath, FileMode.Create, FileAccess.Write))
-        using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Create))
-        {
-            foreach (var kvp in _files)
-            {
-                var entry = archive.CreateEntry(kvp.Key, CompressionLevel.Optimal);
-                using (var entryStream = entry.Open())
-                {
-                    entryStream.Write(kvp.Value, 0, kvp.Value.Length);
-                }
-            }
-        }
+        Utils.CreateArchiveWithDefaults(zipPath, _files);
 
         MechanicaSaveFix.Log.LogDebug($"Wrote {_files.Count} files to zip archive at \"{zipPath}\".");
         return _files.Count;
     }
-
+    
     /// <summary>
     /// Loads the contents of a zip archive from disk into the virtual file system.
     /// </summary>
