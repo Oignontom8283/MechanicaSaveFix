@@ -397,7 +397,7 @@ public static class Patch_LoadGameMenu_Start
     {
         if (SettingsScreenController.IsOpen) return;
 
-        string gameSettings = "gamesettings.txt";
+        string gameSettings = MechanicaSaveFix.saveFileNameGameSettings.Value;
 
         bool isArchive = Utils.GetPathType(savePath) == Utils.PathType.File;
         string settingsPath = isArchive ? savePath : Path.Combine(savePath, gameSettings);
