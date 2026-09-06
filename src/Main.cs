@@ -36,7 +36,6 @@ public class MechanicaSaveFix : BaseUnityPlugin
     public static ConfigEntry<string> archiveExtension;
     public static ConfigEntry<string> backupFolderName;
     public static ConfigEntry<bool> backupEnabled;
-    public static ConfigEntry<bool> deleteNewSaveFolderArtifacts;
     public static ConfigEntry<string> saveFileNameThumbnail;
     public static ConfigEntry<string> saveFileNameSaveinfo;
     public static ConfigEntry<bool> displayArchiveSave;
