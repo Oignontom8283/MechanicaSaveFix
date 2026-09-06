@@ -510,7 +510,7 @@ public static class Utils
     /// <param name="entryName">The name of the file entry inside the archive.</param>
     /// <param name="content">The binary content to write.</param>
     /// <remarks>This method is not recommended for writing multiple files.</remarks>
-    public static void WriteSingleByteFileToZip(string zipPath, string entryName, byte[] content)
+    public static void WriteSingleFileToZip(string zipPath, string entryName, byte[] content)
     {
         if (File.Exists(zipPath) && !VerifyFileValid(zipPath))
         {
@@ -536,15 +536,16 @@ public static class Utils
     }
 
     /// <summary>
-    /// Adds or replaces a single text file inside a zip archive on disk, encoding it as UTF-8.
+    /// Adds or replaces a single text file inside a zip archive on disk. If an entry with
+    /// the same name already exists, it is removed first, then re-added with the new content.
     /// </summary>
     /// <param name="zipPath">The path to the zip archive file. Created if it doesn't exist.</param>
     /// <param name="entryName">The name of the file entry inside the archive.</param>
     /// <param name="content">The text content to write.</param>
     /// <remarks>This method is not recommended for writing multiple files.</remarks>
-    public static void WriteSingleTextFileToZip(string zipPath, string entryName, string content)
+    public static void WriteSingleFileToZip(string zipPath, string entryName, string content)
     {
-        WriteSingleByteFileToZip(zipPath, entryName, TextToBytes(content));
+        WriteSingleFileToZip(zipPath, entryName, TextToBytes(content));
     }
 
     /// <summary>

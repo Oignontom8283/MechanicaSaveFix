@@ -420,7 +420,7 @@ public static class Patch_LoadGameMenu_Start
             string defaultJson = Utils.ToJsonOrThrow(settingsSave);
 
             if (isArchive)
-                Utils.WriteSingleTextFileToZip(settingsPath, gameSettings, defaultJson);
+                Utils.WriteSingleFileToZip(settingsPath, gameSettings, defaultJson);
             else
                 File.WriteAllText(settingsPath, defaultJson);
         }
@@ -432,7 +432,7 @@ public static class Patch_LoadGameMenu_Start
                 string settingsJson = Utils.ToJsonOrThrow(editedSave);
 
                 if (isArchive)
-                    Utils.WriteSingleTextFileToZip(settingsPath, gameSettings, settingsJson);
+                    Utils.WriteSingleFileToZip(settingsPath, gameSettings, settingsJson);
                 else
                     File.WriteAllText(settingsPath, settingsJson);
 
