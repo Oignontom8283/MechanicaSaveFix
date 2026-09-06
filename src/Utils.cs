@@ -10,7 +10,9 @@ using Game.Utilities;
 using UnityEngine;
 
 public static class Utils
-{
+{   
+    #region Other Utilities
+
     /// <summary>
     /// Provides access to the current game context.
     /// </summary>
@@ -19,88 +21,30 @@ public static class Utils
         public static string savesFolderPath => Singleton<SaveManager>.Instance.pGameSavesFolderPath;
     }
 
-    /// <summary>
-    /// Checks if a target path (file or directory) is located inside a parent directory.
-    /// </summary>
-    /// <param name="parentPath">The root directory path.</param>
-    /// <param name="targetPath">The path (file or folder) to check.</param>
-    /// <returns><c>true</c> if <paramref name="targetPath"/> is inside <paramref name="parentPath"/>; otherwise, <c>false</c>.</returns>
-    public static bool IsSubPathOf(string parentPath, string targetPath)
+    private static string[] RemoveEmptyEntries(string[] source)
     {
-        string relativePath = GetRelativePath(parentPath, targetPath);
-
-        return
-            !relativePath.StartsWith("..") && // Ensures path doesn't traverse up out of the parent folder
-            !Path.IsPathRooted(relativePath); // Handles edge cases on different drives/roots (e.g., C:\ vs D:\)
-    }
-    
-    /// <summary>
-    /// Sanitizes a file path by replacing backslashes with forward slashes and removing any leading slashes.
-    /// </summary>
-    /// <param name="path">The file path to sanitize.</param>
-    /// <returns>The sanitized file path.</returns>
-    /// <remarks>
-    /// <b>Necessary for zip file compatibility!</b>
-    /// </remarks>
-    public static string SanitizePath(string path) => Utils.TrimStart(path.Replace('\\', '/'), '/');
-
-    /// <summary>
-    /// Converts a wildcard pattern (using '*' and '?') into a regular expression for matching file paths.
-    /// </summary>
-    /// <param name="pattern">The wildcard pattern to convert.</param>
-    /// <returns>The equivalent regular expression.</returns>
-    public static Regex WildcardToRegex(string pattern)
-    {
-        if (string.IsNullOrEmpty(pattern)) pattern = "*";
-
-        var sb = new StringBuilder();
-        sb.Append('^');
-
-        foreach (char c in pattern)
+        int count = 0;
+        for (int i = 0; i < source.Length; i++)
         {
-            switch (c)
-            {
-                case '*':
-                    sb.Append(".*");
-                    break;
-                case '?':
-                    sb.Append('.');
-                    break;
-                default:
-                    sb.Append(Regex.Escape(c.ToString()));
-                    break;
-            }
+            if (source[i].Length > 0) count++;
         }
 
-        sb.Append('$');
-        return new Regex(sb.ToString(), RegexOptions.Compiled);
+        string[] result = new string[count];
+        int idx = 0;
+        for (int i = 0; i < source.Length; i++)
+        {
+            if (source[i].Length > 0)
+            {
+                result[idx] = source[i];
+                idx++;
+            }
+        }
+        return result;
     }
 
-    /// <summary>
-    /// Converts a string to a byte array using UTF-8 encoding.
-    /// </summary>
-    /// <param name="text">The UTF-8 string to convert.</param>
-    /// <returns>The resulting byte array.</returns>
-    public static byte[] TextToBytes(string text) => Encoding.UTF8.GetBytes(text);
+    #endregion
 
-    /// <summary>
-    /// Converts a byte array to a string using UTF-8 encoding.
-    /// </summary>
-    /// <param name="bytes">The byte array to convert.</param>
-    /// <returns>The resulting UTF-8 string.</returns>
-    public static string BytesToText(byte[] bytes) => Encoding.UTF8.GetString(bytes);
-
-    /// <summary>
-    /// Verifies if a file exists at the specified absolute path and is not empty.
-    /// </summary>
-    /// <param name="absolutePath">The absolute path to the file.</param>
-    /// <returns><c>true</c> if the file exists and is not empty; otherwise, <c>false</c>.</returns>
-    public static bool VerifyFileValid(string absolutePath)
-    {
-        var info = new FileInfo(absolutePath);
-
-        return info.Exists && info.Length > 0;
-    }
+    #region Path Utilities
 
     /// <summary>
     /// Reproduces Path.GetRelativePath(string, string) from .NET Core,
@@ -165,26 +109,156 @@ public static class Utils
         return sb.ToString();
     }
 
-    private static string[] RemoveEmptyEntries(string[] source)
+    /// <summary>
+    /// Checks if a target path (file or directory) is located inside a parent directory.
+    /// </summary>
+    /// <param name="parentPath">The root directory path.</param>
+    /// <param name="targetPath">The path (file or folder) to check.</param>
+    /// <returns><c>true</c> if <paramref name="targetPath"/> is inside <paramref name="parentPath"/>; otherwise, <c>false</c>.</returns>
+    public static bool IsSubPathOf(string parentPath, string targetPath)
     {
-        int count = 0;
-        for (int i = 0; i < source.Length; i++)
+        string relativePath = GetRelativePath(parentPath, targetPath);
+
+        return
+            !relativePath.StartsWith("..") && // Ensures path doesn't traverse up out of the parent folder
+            !Path.IsPathRooted(relativePath); // Handles edge cases on different drives/roots (e.g., C:\ vs D:\)
+    }
+    
+    /// <summary>
+    /// Sanitizes a file path by replacing backslashes with forward slashes and removing any leading slashes.
+    /// </summary>
+    /// <param name="path">The file path to sanitize.</param>
+    /// <returns>The sanitized file path.</returns>
+    /// <remarks>
+    /// <b>Necessary for zip file compatibility!</b>
+    /// </remarks>
+    public static string SanitizePath(string path) => Utils.TrimStart(path.Replace('\\', '/'), '/');
+
+    
+    /// <summary>
+    /// Specifies the type of a file system path, indicating whether it is a file or a directory.
+    /// </summary>
+    public enum PathType
+    {
+        File,
+        Directory
+    }
+
+    /// <summary>
+    /// Determines whether the specified path is a file or a directory.
+    /// </summary>
+    /// <param name="path">The path to check.</param>
+    /// <returns>A <see cref="PathType"/> value indicating whether the path is a file or a directory.</returns>
+    /// <exception cref="ArgumentException">Thrown when the path is null or empty.</exception>
+    /// <exception cref="FileNotFoundException">Thrown when the path does not exist.</exception>
+    public static PathType GetPathType(string path)
+    {
+        if (string.IsNullOrEmpty(path))
         {
-            if (source[i].Length > 0) count++;
+            throw new ArgumentException("Path cannot be null or empty.", nameof(path));
         }
 
-        string[] result = new string[count];
-        int idx = 0;
-        for (int i = 0; i < source.Length; i++)
+        if (File.Exists(path) || Directory.Exists(path))
         {
-            if (source[i].Length > 0)
+            FileAttributes attr = File.GetAttributes(path);
+
+            if (attr.HasFlag(FileAttributes.Directory))
             {
-                result[idx] = source[i];
-                idx++;
+                return PathType.Directory;
+            }
+            else
+            {
+                return PathType.File;
             }
         }
-        return result;
+        else
+        {
+            throw new FileNotFoundException($"The specified path does not exist: {path}");
+        }
     }
+
+    #endregion
+
+    #region String Utilities
+
+    /// <summary>
+    /// Returns a name that doesn't appear in <paramref name="existingNames"/>, derived from
+    /// <paramref name="desiredName"/>. If the desired name (after stripping any existing "_N"
+    /// suffix) is already free, it's returned as-is. Otherwise, "_1", "_2", etc. are appended
+    /// until a free name is found.
+    /// </summary>
+    /// <param name="desiredName">The name to start from.</param>
+    /// <param name="existingNames">The names already taken.</param>
+    /// <returns>A name not present in <paramref name="existingNames"/>.</returns>
+    public static string MakeUniqueName(string desiredName, IEnumerable<string> existingNames)
+    {
+        var taken = new HashSet<string>(existingNames, StringComparer.Ordinal);
+
+        // Strip an existing "_N" suffix (N can be negative or zero) to get the base name.
+        string baseName = Regex.Replace(desiredName, @"_-?\d+$", "");
+
+        if (!taken.Contains(baseName))
+        {
+            return baseName;
+        }
+
+        int suffix = 1;
+        string candidate;
+        do
+        {
+            candidate = $"{baseName}_{suffix}";
+            suffix++;
+        }
+        while (taken.Contains(candidate));
+
+        return candidate;
+    }
+
+    /// <summary>
+    /// Converts a wildcard pattern (using '*' and '?') into a regular expression for matching file paths.
+    /// </summary>
+    /// <param name="pattern">The wildcard pattern to convert.</param>
+    /// <returns>The equivalent regular expression.</returns>
+    public static Regex WildcardToRegex(string pattern)
+    {
+        if (string.IsNullOrEmpty(pattern)) pattern = "*";
+
+        var sb = new StringBuilder();
+        sb.Append('^');
+
+        foreach (char c in pattern)
+        {
+            switch (c)
+            {
+                case '*':
+                    sb.Append(".*");
+                    break;
+                case '?':
+                    sb.Append('.');
+                    break;
+                default:
+                    sb.Append(Regex.Escape(c.ToString()));
+                    break;
+            }
+        }
+
+        sb.Append('$');
+        return new Regex(sb.ToString(), RegexOptions.Compiled);
+    }
+
+    /// <summary>
+    /// Converts a string to a byte array using UTF-8 encoding.
+    /// </summary>
+    /// <param name="text">The UTF-8 string to convert.</param>
+    /// <returns>The resulting byte array.</returns>
+    public static byte[] TextToBytes(string text) => Encoding.UTF8.GetBytes(text);
+
+    /// <summary>
+    /// Converts a byte array to a string using UTF-8 encoding.
+    /// </summary>
+    /// <param name="bytes">The byte array to convert.</param>
+    /// <returns>The resulting UTF-8 string.</returns>
+    public static string BytesToText(byte[] bytes) => Encoding.UTF8.GetString(bytes);
 
     /// <summary>
     /// Removes all leading occurrences of a specified set of characters
@@ -247,6 +321,25 @@ public static class Utils
         return str.Substring(startIndex);
     }
 
+    #endregion
+
+    #region File Utilities
+
+    /// <summary>
+    /// Verifies if a file exists at the specified absolute path and is not empty.
+    /// </summary>
+    /// <param name="absolutePath">The absolute path to the file.</param>
+    /// <returns><c>true</c> if the file exists and is not empty; otherwise, <c>false</c>.</returns>
+    public static bool VerifyFileValid(string absolutePath)
+    {
+        var info = new FileInfo(absolutePath);
+
+        return info.Exists && info.Length > 0;
+    }
+
+    #endregion
+
+    #region JSON/Unity obj Utilities
     
     /// <summary>
     /// Tries to deserialize a JSON string into an object of the specified type.
@@ -336,7 +429,9 @@ public static class Utils
         }
     }
 
-    #region Archive
+    #endregion
+
+    #region Archive Utilities
     
     /// <summary>
     /// Specifies values that indicate whether a compression operation emphasizes speed or compression size.
@@ -494,79 +589,4 @@ public static class Utils
     }
 
     #endregion
-
-    /// <summary>
-    /// Specifies the type of a file system path, indicating whether it is a file or a directory.
-    /// </summary>
-    public enum PathType
-    {
-        File,
-        Directory
-    }
-
-    /// <summary>
-    /// Determines whether the specified path is a file or a directory.
-    /// </summary>
-    /// <param name="path">The path to check.</param>
-    /// <returns>A <see cref="PathType"/> value indicating whether the path is a file or a directory.</returns>
-    /// <exception cref="ArgumentException">Thrown when the path is null or empty.</exception>
-    /// <exception cref="FileNotFoundException">Thrown when the path does not exist.</exception>
-    public static PathType GetPathType(string path)
-    {
-        if (string.IsNullOrEmpty(path))
-        {
-            throw new ArgumentException("Path cannot be null or empty.", nameof(path));
-        }
-
-        if (File.Exists(path) || Directory.Exists(path))
-        {
-            FileAttributes attr = File.GetAttributes(path);
-
-            if (attr.HasFlag(FileAttributes.Directory))
-            {
-                return PathType.Directory;
-            }
-            else
-            {
-                return PathType.File;
-            }
-        }
-        else
-        {
-            throw new FileNotFoundException($"The specified path does not exist: {path}");
-        }
-    }
-
-    /// <summary>
-    /// Returns a name that doesn't appear in <paramref name="existingNames"/>, derived from
-    /// <paramref name="desiredName"/>. If the desired name (after stripping any existing "_N"
-    /// suffix) is already free, it's returned as-is. Otherwise, "_1", "_2", etc. are appended
-    /// until a free name is found.
-    /// </summary>
-    /// <param name="desiredName">The name to start from.</param>
-    /// <param name="existingNames">The names already taken.</param>
-    /// <returns>A name not present in <paramref name="existingNames"/>.</returns>
-    public static string MakeUniqueName(string desiredName, IEnumerable<string> existingNames)
-    {
-        var taken = new HashSet<string>(existingNames, StringComparer.Ordinal);
-
-        // Strip an existing "_N" suffix (N can be negative or zero) to get the base name.
-        string baseName = Regex.Replace(desiredName, @"_-?\d+$", "");
-
-        if (!taken.Contains(baseName))
-        {
-            return baseName;
-        }
-
-        int suffix = 1;
-        string candidate;
-        do
-        {
-            candidate = $"{baseName}_{suffix}";
-            suffix++;
-        }
-        while (taken.Contains(candidate));
-
-        return candidate;
-    }
 }
