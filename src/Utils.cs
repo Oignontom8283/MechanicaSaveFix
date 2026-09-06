@@ -366,6 +366,26 @@ public static class Utils
         }
     }
 
+    #region Archive
+    
+    /// <summary>
+    /// Specifies values that indicate whether a compression operation emphasizes speed or compression size.
+    /// </summary>
+    /// <remarks>
+    /// Use a cast to convert between <see cref="SaveCompressionLevel"/> and <see cref="CompressionLevel"/>.
+    /// <para><b>Example:</b></para>
+    /// <code>
+    /// SaveCompressionLevel level = SaveCompressionLevel.Optimal;
+    /// CompressionLevel systemLevel = (CompressionLevel)level;
+    /// </code>
+    /// </remarks>
+    public enum SaveCompressionLevel
+    {
+        Optimal = CompressionLevel.Optimal,
+        Fast = CompressionLevel.Fastest,
+        None = CompressionLevel.NoCompression
+    }
+
     /// <summary>
     /// Reads a single file from a zip archive on disk and returns its content as a byte array.
     /// </summary>
@@ -441,7 +461,7 @@ public static class Utils
             ZipArchiveEntry existingEntry = archive.GetEntry(sanitizedEntryName);
             existingEntry?.Delete();
 
-            ZipArchiveEntry newEntry = archive.CreateEntry(sanitizedEntryName, CompressionLevel.Optimal);
+            ZipArchiveEntry newEntry = archive.CreateEntry(sanitizedEntryName, (CompressionLevel)MechanicaSaveFix.saveCompressionLevel.Value);
 
             using (var entryStream = newEntry.Open())
             {
@@ -476,7 +496,7 @@ public static class Utils
             foreach (var kvp in entries)
             {
                 string sanitizedEntryName = SanitizePath(kvp.Key);
-                ZipArchiveEntry entry = archive.CreateEntry(sanitizedEntryName, CompressionLevel.Optimal);
+                ZipArchiveEntry entry = archive.CreateEntry(sanitizedEntryName, (CompressionLevel)MechanicaSaveFix.saveCompressionLevel.Value);
 
                 using (var entryStream = entry.Open())
                 {
@@ -502,6 +522,8 @@ public static class Utils
 
         CreateArchiveWithDefaults(zipPath, byteEntries);
     }
+
+    #endregion
 
     /// <summary>
     /// Specifies the type of a file system path, indicating whether it is a file or a directory.

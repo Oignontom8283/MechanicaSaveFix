@@ -39,6 +39,7 @@ public class MechanicaSaveFix : BaseUnityPlugin
     public static ConfigEntry<string> saveFileNameThumbnail;
     public static ConfigEntry<string> saveFileNameSaveinfo;
     public static ConfigEntry<string> saveFileNameGameSettings;
+    public static ConfigEntry<Utils.SaveCompressionLevel> saveCompressionLevel;
     public static ConfigEntry<bool> displayArchiveSave;
     public static ConfigEntry<bool> displayLegacySave;
 
@@ -57,15 +58,16 @@ public class MechanicaSaveFix : BaseUnityPlugin
                               "Changing certain settings could cause the game to malfunction. Only modify what you understand.\n" +
                               "--------------------------------";
 
-        //                                      Section, Key,                    Default value,      Description
-        archiveExtension         = Config.Bind( "Save",  "Extension",            ".msa",             "The file extension for the save archive format."                  ); // yes
-        backupFolderName         = Config.Bind( "Save",  "BackupFolderPath",     "./Backups/",       "The path of the folder where backups will be stored."             ); // yes
-        backupEnabled            = Config.Bind( "Save",  "BackupEnabled",        true,               "Whether to create backups of save files before overwriting them." ); // yes
-        saveFileNameThumbnail    = Config.Bind( "Save",  "ThumbnailFileName",    "thumbnail.jpg",    "The name of the thumbnail file within each save."                 ); // yes
-        saveFileNameSaveinfo     = Config.Bind( "Save",  "SaveinfoFileName",     "saveinfo.txt",     "The name of the info file within each save."                      ); // yes
-        saveFileNameGameSettings = Config.Bind( "Save",  "GameSettingsFileName", "gamesettings.txt", "The name of the game settings file within each save."            ); // yes
-        displayArchiveSave       = Config.Bind( "UI",    "DisplayArchiveSave",   true,               "Whether to display the archive save option in the save menu."     ); // yes
-        displayLegacySave        = Config.Bind( "UI",    "DisplayLegacySave",    true,               "Whether to display the legacy save option in the save menu."      ); // yes
+        //                                      Section, Key,                    Default value,                      Description
+        archiveExtension         = Config.Bind( "Save",  "Extension",            ".msa",                             "The file extension for the save archive format."                  ); // yes
+        backupFolderName         = Config.Bind( "Save",  "BackupFolderPath",     "./Backups/",                       "The path of the folder where backups will be stored."             ); // yes
+        backupEnabled            = Config.Bind( "Save",  "BackupEnabled",        true,                               "Whether to create backups of save files before overwriting them." ); // yes
+        saveFileNameThumbnail    = Config.Bind( "Save",  "ThumbnailFileName",    "thumbnail.jpg",                    "The name of the thumbnail file within each save."                 ); // yes
+        saveFileNameSaveinfo     = Config.Bind( "Save",  "SaveinfoFileName",     "saveinfo.txt",                     "The name of the info file within each save."                      ); // yes
+        saveFileNameGameSettings = Config.Bind( "Save",  "GameSettingsFileName", "gamesettings.txt",                 "The name of the game settings file within each save."            ); // yes
+        saveCompressionLevel     = Config.Bind( "Save",  "CompressionLevel",     Utils.SaveCompressionLevel.Optimal, "The level of compression to use when creating save archives."      ); // yes
+        displayArchiveSave       = Config.Bind( "UI",    "DisplayArchiveSave",   true,                               "Whether to display the archive save option in the save menu."     ); // yes
+        displayLegacySave        = Config.Bind( "UI",    "DisplayLegacySave",    true,                               "Whether to display the legacy save option in the save menu."      ); // yes
 
         Config.Save();
         Config.SaveOnConfigSet = true;
