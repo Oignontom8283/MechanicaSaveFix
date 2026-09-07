@@ -11,6 +11,8 @@ public enum EntryKind { Files, Directories, Both }
 
 public static class VirtualFS
 {
+    #region Fields
+
     /// <summary>
     /// A dictionary that maps file paths to their corresponding content in the virtual file system.
     /// </summary>
@@ -32,6 +34,10 @@ public static class VirtualFS
     /// </summary>
     private static string _root;
 
+    #endregion
+
+
+    #region State Management
 
     /// <summary>
     /// Checks if the virtual file system has been initialized.
@@ -90,6 +96,10 @@ public static class VirtualFS
         }
     }
 
+    #endregion
+
+
+    #region Context Checks
 
     // Utilitary methods for managing the virtual file system
 
@@ -135,6 +145,11 @@ public static class VirtualFS
         }
     }
 
+    #endregion
+
+
+    #region Path Management
+
     /// <summary>
     /// Converts an absolute save file path to a relative path based on the save root directory.
     /// 
@@ -176,8 +191,11 @@ public static class VirtualFS
         return Path.Combine(_root, nativeRelative);
     }
 
-    // Methods for managing capture and playback operations
+    #endregion
 
+
+    // Methods for managing capture and playback operations
+    #region Intercepting Operations
 
     /// <summary>
     /// Begins playback of captured save files.
@@ -220,8 +238,11 @@ public static class VirtualFS
         MechanicaSaveFix.Log.LogDebug($"I/O intercepting ended. Current mode is now {_mode}.");
     }
 
+    #endregion
+
 
     // Methods for managing files in the virtual file system
+    #region File Management
 
     /// <summary>
     /// Checks if a file exists in the virtual file system based on its absolute path.
@@ -427,6 +448,11 @@ public static class VirtualFS
         }
     }
 
+    #endregion
+
+
+    #region Archive Management
+
     /// <summary>
     /// Writes the contents of the virtual file system to a zip archive on disk at the specified path.
     /// </summary>
@@ -610,4 +636,6 @@ public static class VirtualFS
         MechanicaSaveFix.Log.LogDebug($"Successfully saved the world to \"{finalZipPath}\" archive, with backup in \"{backupFolder}\".");
         return (committedFiles, backupCreated, oldBackupDeleted);
     }
+
+    #endregion
 }
