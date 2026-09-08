@@ -7,20 +7,22 @@ using HarmonyLib;
 [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.LoadSave))]
 public static class Patch_SaveManager_LoadSave
 {
-    static void Prefix(string saveFolderPath)
+    static void Prefix(ref string saveFolderPath)
     {
         bool isArchive =  Utils.GetPathType(saveFolderPath) == Utils.PathType.File;
+        string savePath = saveFolderPath;
         
         // Check if the save folder or archive exists
         if (isArchive)
-        {
-            if (!File.Exists(saveFolderPath))
-                throw new FileNotFoundException($"Save archive file not found at \"{saveFolderPath}\".");
+        {   
+            saveFolderPath = Path.ChangeExtension(savePath, null); // Remove the extension for the save folder path
+            if (!File.Exists(savePath))
+                throw new FileNotFoundException($"Save archive file not found at \"{savePath}\".");
         }
         else
         {
-            if (!Directory.Exists(saveFolderPath))
-                throw new DirectoryNotFoundException($"Save folder not found at \"{saveFolderPath}\".");
+            if (!Directory.Exists(savePath))
+                throw new DirectoryNotFoundException($"Save folder not found at \"{savePath}\".");
         }
 
         // Initialize the virtual file system
@@ -32,19 +34,19 @@ public static class Patch_SaveManager_LoadSave
         VirtualFS.Initialize(saveFolderPath);
         MechanicaSaveFix.Log.LogMessage($"VirtualFS initialized!");
         
-        MechanicaSaveFix.Log.LogInfo($"Save type: {(isArchive ? "Archive" : "Folder")} at \"{saveFolderPath}\".");
+        MechanicaSaveFix.Log.LogInfo($"Save type: {(isArchive ? "Archive" : "Folder")} at \"{savePath}\".");
         
         // Load the save files into the virtual file system
         int loadedFiles = 0;
         if (isArchive)
         {
             MechanicaSaveFix.Log.LogInfo($"Loading save archive...");
-            loadedFiles = VirtualFS.LoadZipFromDisk(saveFolderPath);
+            loadedFiles = VirtualFS.LoadZipFromDisk(savePath);
         }
         else
         {
             MechanicaSaveFix.Log.LogInfo($"Loading save folder...");
-            loadedFiles = VirtualFS.LoadFolderFromDisk(saveFolderPath);
+            loadedFiles = VirtualFS.LoadFolderFromDisk(savePath);
         }
         MechanicaSaveFix.Log.LogMessage($"Finished loading {loadedFiles} files.");
 
