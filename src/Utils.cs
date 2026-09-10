@@ -177,6 +177,35 @@ public static class Utils
         }
     }
 
+    /// <summary>
+    /// Sanitizes a file or directory name by replacing invalid characters with a specified replacement character.
+    /// </summary>
+    /// <param name="name">The name to sanitize.</param>
+    /// <param name="replacement">The character to replace invalid characters with.</param>
+    /// <param name="defaultName">The default name to return if the input is null or empty.</param>
+    /// <param name="spaceReplacement">If true, spaces will be replaced with the replacement character.</param>
+    /// <returns>The sanitized name.</returns>
+    public static string SanitizeName(string name, char replacement = '_', string defaultName = "unnamed", bool spaceReplacement = false)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return defaultName;
+
+        foreach (char invalidChar in Path.GetInvalidFileNameChars())
+        {
+            name = name.Replace(invalidChar, replacement);
+        }
+
+        if (spaceReplacement)
+        {
+            name = name.Replace(' ', replacement);
+        }
+
+        // Windows does not allow file names to end with a space or a period, so we trim those characters from the end of the name.
+        name = name.Trim('.', ' ');
+
+        return string.IsNullOrWhiteSpace(name) ? defaultName : name;
+    }
+
     #endregion
 
     #region String Utilities
