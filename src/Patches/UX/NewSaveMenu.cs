@@ -84,7 +84,6 @@ public static class Patch_NewGameMenu_CreateClicked
         GameDifficultySave difficultySave = DifficultyManagerRef(__instance).RetrieveCurrentSettings();
 
         string archivePath = Path.Combine(saveFolderPath, archiveName + MechanicaSaveFix.archiveExtension.Value);
-        string archivePathFolder = Path.Combine(saveFolderPath, archiveName);
 
         try
         {
@@ -105,7 +104,7 @@ public static class Patch_NewGameMenu_CreateClicked
         Utils.GameContext.lobby.ShowAllLoadingScreens();
 
         Utils.GameContext.saveManager.LoadSave(
-            archivePathFolder,                        // The supposed save folder path.
+            archivePath,                              // The supposed save folder path.
             false,                                    // Show loading screen, false, why? I don't know, it's the original code.
             Utils.GameContext.lobby.pCurrent_lobbyID, // The current lobby ID (for multiplayer).
             false                                     // Loade in DEV TEST mode (Removed by the mod).
