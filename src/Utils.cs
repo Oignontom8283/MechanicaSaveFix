@@ -6,6 +6,7 @@ using System.IO.Compression;
 using System.Text;
 using System.Text.RegularExpressions;
 using Game.Saving;
+using Game.UI;
 using Game.Utilities;
 using UnityEngine;
 
@@ -19,6 +20,9 @@ public static class Utils
     public static class GameContext
     {
         public static string savesFolderPath => Singleton<SaveManager>.Instance.pGameSavesFolderPath;
+        public static LoadingScreen loadingScreen => Singleton<LoadingScreen>.Instance;
+        public static Lobby lobby => Singleton<Lobby>.Instance;
+        public static SaveManager saveManager => Singleton<SaveManager>.Instance;
     }
 
     private static string[] RemoveEmptyEntries(string[] source)
