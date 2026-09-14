@@ -114,28 +114,4 @@ public static class Patch_NewGameMenu_CreateClicked
 
         return false;
     }
-
-    private static string MakeSafeFileName(string name)
-    {
-        foreach (char c in Path.GetInvalidFileNameChars())
-        {
-            name = name.Replace(c, '-');
-        }
-        return name;
-    }
-
-    private static string MakeUniqueSaveName(string savesFolder, string baseName)
-    {
-        string candidate = baseName;
-        int suffix = 1;
-
-        while (Directory.Exists(Path.Combine(savesFolder, candidate)) ||
-               File.Exists(Path.Combine(savesFolder, candidate + MechanicaSaveFix.archiveExtension.Value)))
-        {
-            candidate = $"{baseName}_{suffix}";
-            suffix++;
-        }
-
-        return candidate;
-    }
 }
