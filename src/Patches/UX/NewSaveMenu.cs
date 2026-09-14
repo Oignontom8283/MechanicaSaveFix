@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Game.Saving;
 using Game.UI;
@@ -46,7 +47,13 @@ public static class Patch_NewGameMenu_CreateClicked
         string saveName = SaveNameInputFieldRef(__instance).text;
         if (string.IsNullOrEmpty(saveName)) saveName = MechanicaSaveFix.defaultSaveName.Value;
 
-        string archiveName = Utils.MakeUniqueName(Utils.SanitizeName(saveName), []); // TODO
+        // Get names of existing saves containers
+        string[] existingSaves = [
+            ..Directory.GetDirectories(Utils.GameContext.savesFolderPath),
+            ..Directory.GetFiles(Utils.GameContext.savesFolderPath, $"*{MechanicaSaveFix.archiveExtension.Value}").Select(name => Path.GetFileNameWithoutExtension(name)).ToArray()
+        ];
+
+        string archiveName = Utils.MakeUniqueName(Utils.SanitizeName(saveName), existingSaves);
 
         // Create a new GameSave obj (world settings)
         GameSave gameSave = new GameSave(
