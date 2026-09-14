@@ -53,10 +53,9 @@ public static class Patch_NewGameMenu_CreateClicked
         if (string.IsNullOrEmpty(saveName)) saveName = MechanicaSaveFix.defaultSaveName.Value;
 
         // Get names of existing saves containers
-        string[] existingSaves = [
-            ..Directory.GetDirectories(saveFolderPath),
-            ..Directory.GetFiles(saveFolderPath, $"*{MechanicaSaveFix.archiveExtension.Value}").Select(Path.GetFileNameWithoutExtension).ToArray()
-        ];
+        string[] existingSaves = Directory.GetDirectories(saveFolderPath).Concat(
+            Directory.GetFiles(saveFolderPath, $"*{MechanicaSaveFix.archiveExtension.Value}").Select(Path.GetFileNameWithoutExtension).ToArray()
+        ).ToArray();
 
         string archiveName = Utils.MakeUniqueName(Utils.SanitizeName(saveName), existingSaves);
 
