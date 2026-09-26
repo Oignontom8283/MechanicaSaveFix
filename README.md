@@ -101,3 +101,5 @@ Launch your game normally... There you go (:
 ## License
 
 This project is licensed under the AGPL-v3.0 (GNU Affero General Public License v3.0), see the [LICENSE](LICENSE) file for informations.
+
+This project is not affiliated with Deimos Interactive, the developer of Mechanica or any other company or entity. All rights to the game Mechanica are owned by Deimos Interactive.
