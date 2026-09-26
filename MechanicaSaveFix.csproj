@@ -74,6 +74,10 @@
       <HintPath>Libraries/UnityEngine.InputLegacyModule.dll</HintPath>
     </Reference>
 
+    <Reference Include="UnityEngine.UnityWebRequestModule">
+      <HintPath>Libraries/UnityEngine.UnityWebRequestModule.dll</HintPath>
+    </Reference>
+
     <Reference Include="Assembly-CSharp">
       <HintPath>Libraries/Assembly-CSharp.dll</HintPath>
     </Reference>
