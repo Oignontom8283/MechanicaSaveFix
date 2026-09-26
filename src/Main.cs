@@ -1,8 +1,13 @@
+using System;
+using System.Collections;
+using System.Diagnostics;
 using System.IO;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
+using UnityEngine;
+using UnityEngine.Networking;
 
 [BepInPlugin(MOD_GUID, MOD_NAME, MOD_VERSION)]
 public class MechanicaSaveFix : BaseUnityPlugin
@@ -12,6 +17,7 @@ public class MechanicaSaveFix : BaseUnityPlugin
     public const string MOD_VERSION = BuildInfo.Version;
     public const string MOD_COMMIT_HASH = BuildInfo.CommitHash;
     public const string MOD_BUILD_DATE = BuildInfo.BuildDateUtc;
+    public const string GITGUB_REPO_ID = "Oignontom8283/MechanicaSaveFix";
 
     internal static ManualLogSource Log;
     private readonly Harmony harmony = new Harmony(MOD_GUID);
@@ -28,6 +34,8 @@ public class MechanicaSaveFix : BaseUnityPlugin
         Log.LogInfo($"   v{MOD_VERSION} - {MOD_COMMIT_HASH[..12]}");
         Log.LogInfo($"  Built on {MOD_BUILD_DATE}");
         Log.LogInfo(" ");
+
+        this.StartCoroutine(CheckUpdate()); // Start the update check coroutine
         
         // Apply Harmony patches
         harmony.PatchAll();
@@ -101,5 +109,83 @@ public class MechanicaSaveFix : BaseUnityPlugin
 
         // Write the modified content back to the configuration file
         File.WriteAllText(Config.ConfigFilePath, newFileContent);
+    }
+
+    private IEnumerator CheckUpdate()
+    {
+        if (!updateCheckPromptShown.Value)
+        {
+            bool accepted = NativeMessageBox.ShowYesNo(
+                $"Would you like {MechanicaSaveFix.MOD_NAME} to automatically check for new updates on startup?\n\n" +
+                "This only checks GitHub for a newer version; nothing is downloaded automatically!\n" +
+                "No telemetry. If enabled, a single request is made to GitHub's API per launch to check for the latest release.\n\n" +
+                "You can change this setting later in the configuration file.",
+                $"{MechanicaSaveFix.MOD_NAME} - Update Check");
+
+            updateCheckPromptShown.Value = true;
+            checkForUpdatesEnabled.Value = accepted;
+        }
+
+        if (!checkForUpdatesEnabled.Value)
+        {
+            Log.LogInfo("Update checks are disabled. Skipping update check.");
+            yield break; // Exit the coroutine if update checks are disabled
+        }
+
+
+        string githubApiUrl = $"https://api.github.com/repos/{GITGUB_REPO_ID}/releases/latest";
+
+        using (UnityWebRequest request = UnityWebRequest.Get(githubApiUrl))
+        {
+            request.SetRequestHeader("User-Agent", MOD_NAME);
+
+            yield return request.SendWebRequest();
+
+
+            if (request.responseCode == 404)
+            {
+                Log.LogInfo("No releases published yet on GitHub. Skipping update check.");
+                yield break;
+            }
+
+            if (!string.IsNullOrEmpty(request.error))
+            {
+                Log.LogWarning($"Failed to check for updates: {request.error}");
+                yield break;
+            }
+
+            GitHubRelease release = Utils.FromJsonOrNull<GitHubRelease>(request.downloadHandler.text);
+            if (release == null || string.IsNullOrEmpty(release.tag_name))
+            {
+                Log.LogWarning("Failed to parse GitHub release information.");
+                yield break;
+            }
+
+            if (!Utils.IsNewerVersion(release.tag_name, MOD_VERSION))
+            {
+                Log.LogInfo($"No updates found. Current version: {MOD_VERSION}, Latest version: {release.tag_name}");
+                yield break;
+            }
+
+            Log.LogMessage($"A new version is available: {release.tag_name}");
+
+            bool openPage = NativeMessageBox.ShowYesNo(
+                $"A new version of {MechanicaSaveFix.MOD_NAME} is available ({release.tag_name})!\n\n" +
+                "Do you want to open the version page? The game would close.",
+                $"{MechanicaSaveFix.MOD_NAME} - Update Available");
+
+            if (openPage)
+            {
+                Process.Start(release.html_url);
+                Application.Quit();
+            }
+        }
+    }
+
+    [Serializable]
+    private class GitHubRelease
+    {
+        public string tag_name = string.Empty;
+        public string html_url = string.Empty;
     }
 }
