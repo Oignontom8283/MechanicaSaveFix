@@ -354,6 +354,39 @@ public static class Utils
         return str.Substring(startIndex);
     }
 
+    /// <summary>
+    /// Compares two version strings (with or without a leading "v"),
+    /// ignoring any text after the numeric version.
+    /// </summary>
+    /// <param name="remoteTag">The remote version string (e.g., "v1.2.3").</param>
+    /// <param name="localVersion">The local version string (e.g., "1.2.0").</param>
+    /// <returns><c>true</c> if the remote version is newer than the local version; otherwise, <c>false</c>.</returns>
+    public static bool IsNewerVersion(string remoteTag, string localVersion)
+    {
+        static string NormalizeVersion(string version)
+        {
+            version = version.Trim().TrimStart('v', 'V');
+
+            int separatorIndex = version.IndexOfAny(new[] { '-', '+', ' ' });
+
+            if (separatorIndex >= 0)
+                version = version.Substring(0, separatorIndex);
+
+            return version;
+        }
+
+        string remoteClean = NormalizeVersion(remoteTag);
+        string localClean = NormalizeVersion(localVersion);
+
+        if (Version.TryParse(remoteClean, out Version remote) &&
+            Version.TryParse(localClean, out Version local))
+        {
+            return remote > local;
+        }
+
+        return false;
+    }
+
     #endregion
 
     #region File Utilities
