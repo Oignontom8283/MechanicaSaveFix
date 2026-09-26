@@ -33,6 +33,8 @@ public class MechanicaSaveFix : BaseUnityPlugin
         harmony.PatchAll();
     }
 
+    public static string configHeader;
+
     public static ConfigEntry<string> archiveExtension;
     public static ConfigEntry<string> backupFolderName;
     public static ConfigEntry<bool> backupEnabled;
@@ -49,15 +51,19 @@ public class MechanicaSaveFix : BaseUnityPlugin
     /// </summary>
     private void ConfigBind()
     {
+        // Reapply the configuration header whenever a setting is changed
+        Config.SettingChanged += (_, _) => ReapplyConfigHeader();
+
+
         Config.SaveOnConfigSet = false;
 
-        string configHeader = $"{MOD_NAME} v{MOD_VERSION} Configuration!\n" +
-                              "--------------------------------\n" +
-                              $"This configuration file allows you to customize the behavior of the {MOD_NAME} plugin.\n" +
-                              "You can modify the settings below to suit your preferences.\n" +
-                              "\n" +
-                              "Changing certain settings could cause the game to malfunction. Only modify what you understand.\n" +
-                              "--------------------------------";
+        configHeader = $"{MOD_NAME} v{MOD_VERSION} Configuration!\n" +
+                        "--------------------------------\n" +
+                        $"This configuration file allows you to customize the behavior of the {MOD_NAME} plugin.\n" +
+                        "You can modify the settings below to suit your preferences.\n" +
+                        "\n" +
+                        "Changing certain settings could cause the game to malfunction. Only modify what you understand!\n" +
+                        "--------------------------------";
 
         //                                      Section, Key,                    Default value,                      Description
         archiveExtension         = Config.Bind( "Save",  "Extension",            ".msa",                             "The file extension for the save archive format."                  ); // yes
@@ -74,16 +80,18 @@ public class MechanicaSaveFix : BaseUnityPlugin
         Config.Save();
         Config.SaveOnConfigSet = true;
 
-        
-        // Add a header to the configuration file
-        string prefixLine = "# ";
+        ReapplyConfigHeader();
+    }
 
-        if (!File.Exists(Config.ConfigFilePath))
-            return;
+    private void ReapplyConfigHeader()
+    {   
+        if (!File.Exists(Config.ConfigFilePath)) return;
+
+        string prefixLine = "# ";
 
         string fileContent = File.ReadAllText(Config.ConfigFilePath);
 
-        // Add a header to the configuration file
+        // Add a header to the configuration file content
         string headerContent = prefixLine + configHeader.Replace("\n", "\n" + prefixLine);
         string newFileContent = headerContent + "\n\n" + fileContent;
 
