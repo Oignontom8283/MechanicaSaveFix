@@ -34,6 +34,10 @@ Legally, please.
 - Download the latest version of the mod [here](https://github.com/Oignontom8283/MechanicaSaveFix/releases). It comes as a `.dll` file.
 - Copy the `.dll` file into the game's `BepInEx\plugins` folder. By default, that's `C:\Program Files (x86)\Steam\steamapps\common\Mechanica\BepInEx\plugins`.
 
+> [!INFO]
+> For Linux users, it would apparently be necessary to allow DLL injection in the Proton settings.
+> This has not been tested (my Linux machine died), but it should work. Feel free to share your feedback on this.
+
 ### 4. Done!
 
 ## Work done (non-exhaustive)
@@ -117,6 +121,14 @@ Launch your game normally... There you go (:
 > # Default value: false
 > Enabled = true    <-- Here!
 > ```
+
+## Help
+
+If you run into problems, feel free to open a ticket on the GitHub repository.
+
+Feel free to share your experience in Discussions or an Issue (:
+
+If you want help or information about how Mechanica works and how to mod it, you can contact me however you like :3
 
 ## License
 
