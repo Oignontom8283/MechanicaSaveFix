@@ -43,47 +43,47 @@
   <ItemGroup>
 
     <Reference Include="HarmonyLib">
-      <HintPath>Libraries/0Harmony.dll</HintPath>
+      <HintPath>Libraries/0Harmony.ref.dll</HintPath>
     </Reference>
 
     <Reference Include="BepInEx">
-      <HintPath>Libraries/BepInEx.dll</HintPath>
+      <HintPath>Libraries/BepInEx.ref.dll</HintPath>
     </Reference>
 
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>Libraries/UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>Libraries/UnityEngine.CoreModule.ref.dll</HintPath>
     </Reference>
 
     <Reference Include="UnityEngine.JSONSerializeModule">
-      <HintPath>Libraries/UnityEngine.JSONSerializeModule.dll</HintPath>
+      <HintPath>Libraries/UnityEngine.JSONSerializeModule.ref.dll</HintPath>
     </Reference>
 
     <Reference Include="UnityEngine">
-      <HintPath>Libraries/UnityEngine.dll</HintPath>
+      <HintPath>Libraries/UnityEngine.ref.dll</HintPath>
     </Reference>
 
     <Reference Include="UnityEngine.UI">
-      <HintPath>Libraries/UnityEngine.UI.dll</HintPath>
+      <HintPath>Libraries/UnityEngine.UI.ref.dll</HintPath>
     </Reference>
 
     <Reference Include="UnityEngine.ImageConversionModule">
-      <HintPath>Libraries/UnityEngine.ImageConversionModule.dll</HintPath>
+      <HintPath>Libraries/UnityEngine.ImageConversionModule.ref.dll</HintPath>
     </Reference>
 
     <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>Libraries/UnityEngine.InputLegacyModule.dll</HintPath>
+      <HintPath>Libraries/UnityEngine.InputLegacyModule.ref.dll</HintPath>
     </Reference>
 
     <Reference Include="UnityEngine.UnityWebRequestModule">
-      <HintPath>Libraries/UnityEngine.UnityWebRequestModule.dll</HintPath>
+      <HintPath>Libraries/UnityEngine.UnityWebRequestModule.ref.dll</HintPath>
     </Reference>
 
     <Reference Include="Assembly-CSharp">
-      <HintPath>Libraries/Assembly-CSharp.dll</HintPath>
+      <HintPath>Libraries/Assembly-CSharp.ref.dll</HintPath>
     </Reference>
 
     <Reference Include="PhotonUnityNetworking">
-      <HintPath>Libraries/PhotonUnityNetworking.dll</HintPath>
+      <HintPath>Libraries/PhotonUnityNetworking.ref.dll</HintPath>
     </Reference>
 
   </ItemGroup>
