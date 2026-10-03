@@ -21,6 +21,8 @@ public static class VirtualFS
     /// </remarks>
     private static readonly Dictionary<string, byte[]> _files = new Dictionary<string, byte[]>(StringComparer.Ordinal);
 
+    private static readonly HashSet<string> _directories = new HashSet<string>(StringComparer.Ordinal);
+
     /// <summary>
     /// Current mode of the capture/playback system.
     /// - `Idle`: Not capturing or playing back.
@@ -61,6 +63,7 @@ public static class VirtualFS
         }
         _root = RootSaveDirectory;
         _files.Clear();
+        _directories.Clear();
     }
 
     /// <summary>
@@ -80,6 +83,7 @@ public static class VirtualFS
 
         _root = null;
         _files.Clear();
+        _directories.Clear();
 
     }
 
@@ -125,9 +129,9 @@ public static class VirtualFS
     private static void RequireEmpty(string caller)
     {
         EnsureInitialized(nameof(RequireEmpty));
-        if (_files.Count != 0)
+        if (_files.Count != 0 || _directories.Count != 0)
         {
-            throw new InvalidOperationException($"VirtualFS.{caller}: Expected empty virtual file system, but found {_files.Count} files. (Use Clear() to reset.)");
+            throw new InvalidOperationException($"VirtualFS.{caller}: Expected empty virtual file system, but found {_files.Count} files and {_directories.Count} directories. (Use Clear() to reset.)");
         }
     }
 
@@ -276,6 +280,62 @@ public static class VirtualFS
         return fileExisted;
     }
 
+    public static bool IsExistDirectory(string absolutePath)
+    {
+        EnsureInitialized(nameof(IsExistDirectory));
+
+        string relativePath = Utils.SanitizePath(ToRelativeSaveFilePath(absolutePath));
+        if (relativePath == ".")
+            relativePath = string.Empty;
+
+        if (relativePath.Length == 0 || _directories.Contains(relativePath))
+            return true;
+
+        string prefix = relativePath + "/";
+        foreach (string directory in _directories)
+        {
+            if (directory.StartsWith(prefix, StringComparison.Ordinal))
+                return true;
+        }
+
+        foreach (string file in _files.Keys)
+        {
+            if (file.StartsWith(prefix, StringComparison.Ordinal))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static void AddDirectoryAndParents(string relativePath)
+    {
+        if (string.IsNullOrEmpty(relativePath) || relativePath == ".")
+            return;
+
+        string directory = Utils.SanitizePath(relativePath);
+        while (directory.Length > 0 && directory != ".")
+        {
+            _directories.Add(directory);
+
+            int separatorIndex = directory.LastIndexOf('/');
+            if (separatorIndex < 0)
+                break;
+
+            directory = directory.Substring(0, separatorIndex);
+        }
+    }
+
+    public static void CreateDirectory(string absolutePath)
+    {
+        EnsureInitialized(nameof(CreateDirectory));
+
+        string relativePath = ToRelativeSaveFilePath(absolutePath);
+        if (relativePath == ".")
+            return;
+
+        AddDirectoryAndParents(Utils.SanitizePath(relativePath));
+    }
+
     /// <summary>
     /// Writes a binary file to the virtual file system with the specified content.
     /// </summary>
@@ -292,6 +352,7 @@ public static class VirtualFS
         bool IsReplace = _files.ContainsKey(sanitizedPath);
 
         _files[sanitizedPath] = bytes;
+        AddDirectoryAndParents(Path.GetDirectoryName(sanitizedPath));
 
         return IsReplace;
     }
@@ -363,6 +424,20 @@ public static class VirtualFS
         // Track yielded directory names to prevent duplicate results
         var seenDirs = new HashSet<string>(StringComparer.Ordinal);
 
+        foreach (string directory in _directories)
+        {
+            if (!directory.StartsWith(prefix, StringComparison.Ordinal))
+                continue;
+
+            string remainder = directory.Substring(prefix.Length);
+            if (remainder.Length == 0 || (!recursive && remainder.IndexOf('/') >= 0))
+                continue;
+
+            string directoryName = remainder.Substring(remainder.LastIndexOf('/') + 1);
+            if ((kind == EntryKind.Directories || kind == EntryKind.Both) && regex.IsMatch(directoryName) && seenDirs.Add(directory))
+                yield return ToAbsoluteFake(prefix + remainder);
+        }
+
         foreach (string key in _files.Keys)
         {
             // Skip entries outside the target directory path
@@ -386,9 +461,9 @@ public static class VirtualFS
                 string immediateSubdir = remainder.Substring(0, slashIndex);
 
                 // Yield subdirectories once if requested
-                if (kind == EntryKind.Directories || kind == EntryKind.Both)
+                if (!recursive && (kind == EntryKind.Directories || kind == EntryKind.Both))
                 {
-                    if (seenDirs.Add(immediateSubdir))
+                    if (seenDirs.Add(prefix + immediateSubdir))
                         yield return ToAbsoluteFake(prefix + immediateSubdir);
                 }
 
@@ -417,12 +492,10 @@ public static class VirtualFS
     {
         EnsureInitialized(nameof(DeleteDirectory));
 
-        string relDir = ToRelativeSaveFilePath(absolutePath);
+        string relDir = Utils.SanitizePath(ToRelativeSaveFilePath(absolutePath));
         if (relDir == ".") relDir = string.Empty;
         string prefix = relDir.Length == 0 ? "" : relDir + "/";
 
-        // Un dossier n'existe, dans ce VFS, que s'il contient au moins un fichier
-        // (les dossiers vides ne sont jamais représentés dans _files).
         var matchingKeys = new List<string>();
         foreach (string key in _files.Keys)
         {
@@ -430,13 +503,24 @@ public static class VirtualFS
                 matchingKeys.Add(key);
         }
 
-        if (matchingKeys.Count == 0)
+        bool directoryExists = relDir.Length == 0 || _directories.Contains(relDir) || matchingKeys.Count > 0;
+        if (!directoryExists)
         {
             throw new DirectoryNotFoundException(
                 $"VirtualFS.{nameof(DeleteDirectory)}: Directory not found in virtual file system: {relDir}");
         }
 
-        if (!recursive)
+        bool hasChildDirectory = false;
+        foreach (string directory in _directories)
+        {
+            if (directory.StartsWith(prefix, StringComparison.Ordinal) && directory.Length > prefix.Length)
+            {
+                hasChildDirectory = true;
+                break;
+            }
+        }
+
+        if (!recursive && (matchingKeys.Count > 0 || hasChildDirectory))
         {
             throw new IOException(
                 $"VirtualFS.{nameof(DeleteDirectory)}: Directory is not empty (recursive=false): {relDir}");
@@ -446,6 +530,8 @@ public static class VirtualFS
         {
             _files.Remove(key);
         }
+
+        _directories.RemoveWhere(directory => directory == relDir || directory.StartsWith(prefix, StringComparison.Ordinal));
     }
 
     #endregion
@@ -492,17 +578,20 @@ public static class VirtualFS
         {
             foreach (ZipArchiveEntry entry in archive.Entries)
             {
+                string sanitizePath = Utils.SanitizePath(entry.FullName);
+
                 if (string.IsNullOrEmpty(entry.Name))
                 {
+                    AddDirectoryAndParents(sanitizePath.TrimEnd(new[] { '/' }));
                     continue;
                 }
-
-                string sanitizePath = Utils.SanitizePath(entry.FullName);
 
                 using (var entryStream = entry.Open())
                 using (var ms = new MemoryStream())
                 {
                     entryStream.CopyTo(ms);
+
+                    AddDirectoryAndParents(Path.GetDirectoryName(sanitizePath));
 
                     if (!_files.TryAdd(sanitizePath, ms.ToArray()))
                     {
@@ -535,6 +624,12 @@ public static class VirtualFS
             throw new DirectoryNotFoundException($"VirtualFS.{nameof(LoadFolderFromDisk)}: Folder not found at \"{folderPath}\".");
         }
 
+        foreach (DirectoryInfo directory in sourceDir.EnumerateDirectories("*", SearchOption.AllDirectories))
+        {
+            string relativePath = Utils.GetRelativePath(folderPath, directory.FullName);
+            AddDirectoryAndParents(Utils.SanitizePath(relativePath));
+        }
+
         foreach (FileInfo file in sourceDir.EnumerateFiles("*", SearchOption.AllDirectories))
         {
             string relativePath = Utils.GetRelativePath(folderPath, file.FullName);
@@ -549,6 +644,7 @@ public static class VirtualFS
             }
 
             _files[sanitizedPath] = bytes;
+            AddDirectoryAndParents(Path.GetDirectoryName(sanitizedPath));
         }
 
         MechanicaSaveFix.Log.LogDebug($"Loaded {_files.Count} files from folder at \"{folderPath}\".");

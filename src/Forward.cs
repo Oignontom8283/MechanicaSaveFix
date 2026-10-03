@@ -55,10 +55,8 @@ public static class Forward
     public static bool DirectoryExists(string absoluteDirPath)
     {
         MechanicaSaveFix.Log.LogDebug($"{nameof(DirectoryExists)}: {absoluteDirPath}");
-        return VirtualFS.QueryEntries(absoluteDirPath, "*", recursive: true, EntryKind.Both).Any();
+        return VirtualFS.IsExistDirectory(absoluteDirPath);
     }
-
-    // CreateDirectory is not implemented because the virtual file system does not support creating directories directly. Instead, directories are created implicitly when files are written to them.
 
     public static void DeleteDirectory(string absolutePath, bool recursive)
     {
