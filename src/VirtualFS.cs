@@ -169,6 +169,22 @@ public static class VirtualFS
         return Utils.GetRelativePath(_root, absoluteSaveFilePath);
     }
 
+    private static string ToVirtualPath(string absolutePath)
+    {
+        return Utils.SanitizePath(ToRelativeSaveFilePath(absolutePath));
+    }
+
+    private static string ToVirtualPathOrRoot(string absolutePath)
+    {
+        string relativePath = ToVirtualPath(absolutePath);
+        return relativePath == "." ? string.Empty : relativePath;
+    }
+
+    private static string GetPathPrefix(string relativePath)
+    {
+        return relativePath.Length == 0 ? string.Empty : relativePath + "/";
+    }
+
     /// <summary>
     /// Checks if a given absolute path is within the scope of the current virtual file system operation
     /// </summary>
@@ -284,9 +300,7 @@ public static class VirtualFS
     {
         EnsureInitialized(nameof(IsExistDirectory));
 
-        string relativePath = Utils.SanitizePath(ToRelativeSaveFilePath(absolutePath));
-        if (relativePath == ".")
-            relativePath = string.Empty;
+        string relativePath = ToVirtualPathOrRoot(absolutePath);
 
         if (relativePath.Length == 0 || _directories.Contains(relativePath))
             return true;
@@ -411,13 +425,8 @@ public static class VirtualFS
     public static IEnumerable<string> QueryEntries(string absoluteDir, string searchPattern, bool recursive, EntryKind kind)
     {
         // Normalize target path to the virtual file system's relative format
-        string relDir = ToRelativeSaveFilePath(absoluteDir);
-        // GetRelativePath returns "." when both paths are identical (root case).
-        if (relDir == ".") relDir = string.Empty;
-        // Sanitize the relative path to ensure consistent formatting
-        relDir = Utils.SanitizePath(relDir);
-        // Ensure trailing slash for prefix matching unless targeting root
-        string prefix = relDir.Length == 0 ? "" : relDir + "/";
+        string relDir = ToVirtualPathOrRoot(absoluteDir);
+        string prefix = GetPathPrefix(relDir);
         // Convert wildcard pattern (*, ?) into an executable Regex
         Regex regex = Utils.WildcardToRegex(searchPattern);
 
@@ -492,9 +501,8 @@ public static class VirtualFS
     {
         EnsureInitialized(nameof(DeleteDirectory));
 
-        string relDir = Utils.SanitizePath(ToRelativeSaveFilePath(absolutePath));
-        if (relDir == ".") relDir = string.Empty;
-        string prefix = relDir.Length == 0 ? "" : relDir + "/";
+        string relDir = ToVirtualPathOrRoot(absolutePath);
+        string prefix = GetPathPrefix(relDir);
 
         var matchingKeys = new List<string>();
         foreach (string key in _files.Keys)
