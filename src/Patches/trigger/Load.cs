@@ -54,16 +54,12 @@ public static class Patch_SaveManager_LoadSave
         VirtualFS.StartIntercepting();
         MechanicaSaveFix.Log.LogMessage($"Start world I/O intercepting.");
     }
+
 }
 
-[HarmonyPatch]
+[HarmonyPatch(typeof(SaveManager), "FinalizeLoad", new[] { typeof(ulong) })]
 public static class Patch_SaveManager_FinalizeLoad
 {
-    static System.Reflection.MethodBase TargetMethod()
-    {
-        return AccessTools.Method(typeof(SaveManager), "FinalizeLoad", new[] { typeof(ulong) });
-    }
-
     private static IEnumerator PlaybackWrapper(IEnumerator original)
     {
         yield return original;
