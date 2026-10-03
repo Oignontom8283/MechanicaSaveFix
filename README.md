@@ -14,8 +14,17 @@ This project is **a lot of hacking**. The game's save system was not designed to
 - **It does not fix multiplayer.** Multiplayer issues are out of scope, and multiplayer behavior with this mod is not guaranteed.
 - **It does not repair corrupted worlds.** A world that was already broken stays broken. The mod only changes how saves are stored.
 - **Saves are converted to `.msa` archives.** On the first save, a world is converted. Your original folder is left untouched, but the game itself cannot read `.msa` files, so without the mod only the original folder is usable.
-  **The `.msa` file is simply an archive containing the normal save files.** To restore a standard save the base game can use, extract the contents of the `.msa` file into a folder.
+  **The `.msa` file is simply an archive containing the normal save files and directory structure.** Empty directories are written as explicit archive entries, so extracting the archive with 7-Zip, WinRAR, or another standard archive tool recreates them as well. To restore a standard save the base game can use, extract the complete contents of the `.msa` file into a folder.
 - **Keep backups of your worlds.** The mod has a backup option, but this is beta software.
+
+### Archive behavior
+
+During loading and saving, the mod keeps both files and directories in its virtual file system. The game creates some directories without immediately writing a file into them, so directory existence cannot be inferred from files alone. The mod preserves these empty directories in memory, during cleanup, and when writing the `.msa` archive.
+
+The archive can therefore be used in two ways:
+
+- The mod loads the archive directly and reconstructs the virtual directory tree.
+- The archive can be extracted manually to recover the game's standard folder-based save layout, including empty directories.
 
 ## Installation
 
@@ -54,7 +63,7 @@ Legally, please.
 - **One file per entity.** Every object, robot, weld, link, and so on is saved as its own small file in nested folders. A small test world already means hundreds of folders, and big worlds reach thousands of files. This is the suspected cause of the endless "saving/loading" hangs on large worlds (ISL). That's not proven, and the hangs are very hard to reproduce.
 - **No central save code.** Each system (objects, robots, welds, natural resources, storage, links...) reads and writes its own files through its own methods. There's no single place to hook into.
 - **Incremental saving plus a cleanup pass.** The game only rewrites entities that changed, then deletes every file that's not on its list of valid paths, compared as exact strings. The mod therefore has to keep the complete world state in memory and reproduce the game's path strings exactly, including mixed `/` and `\` separators, letter case, and spaces.
-- **Folders only exist implicitly.** The game checks whether folders exist before reading them, and some of them are legitimately empty. The virtual file system has to claim that folders exist even when nothing is inside them.
+- **The game creates folders implicitly.** The game checks whether folders exist before reading them, and some of them are legitimately empty. The virtual file system therefore tracks directories explicitly and separately from files, preserves them during cleanup, and writes explicit entries for empty directories in the archive.
 - **Not everything goes through `File` and `Directory`.** Some code paths use `FileInfo` and `DirectoryInfo` instead, which needed their own interception.
 - **Link loading retry loop.** Links are loaded with a retry loop of up to 100 passes that's supposed to yield every few loads. From the decompiled code, its counter is never incremented, so it runs synchronously.
 - **Save sub-tasks can fail silently.** The save runs several coroutines in parallel and waits for each one to report "done". An exception thrown inside one of them after it has started is not caught, so its flag may never be set and the main save waits forever. This is a possible cause of the hangs, also unconfirmed.
