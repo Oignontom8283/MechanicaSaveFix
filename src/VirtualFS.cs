@@ -273,8 +273,7 @@ public static class VirtualFS
     {
         EnsureInitialized(nameof(IsExistFile));
 
-        string relativePath = ToRelativeSaveFilePath(absolutePath);
-        string sanitizedPath = Utils.SanitizePath(relativePath);
+        string sanitizedPath = ToVirtualPath(absolutePath);
 
         return _files.ContainsKey(sanitizedPath);
     }
@@ -288,8 +287,7 @@ public static class VirtualFS
     {
         EnsureInitialized(nameof(DeleteFile));
 
-        string relativePath = ToRelativeSaveFilePath(absolutePath);
-        string sanitizedPath = Utils.SanitizePath(relativePath);
+        string sanitizedPath = ToVirtualPath(absolutePath);
 
         bool fileExisted = _files.Remove(sanitizedPath);
 
@@ -343,11 +341,11 @@ public static class VirtualFS
     {
         EnsureInitialized(nameof(CreateDirectory));
 
-        string relativePath = ToRelativeSaveFilePath(absolutePath);
+        string relativePath = ToVirtualPath(absolutePath);
         if (relativePath == ".")
             return;
 
-        AddDirectoryAndParents(Utils.SanitizePath(relativePath));
+        AddDirectoryAndParents(relativePath);
     }
 
     /// <summary>
@@ -360,8 +358,7 @@ public static class VirtualFS
     {
         EnsureInitialized(nameof(WriteBinaryFile));
 
-        string relativePath = ToRelativeSaveFilePath(absolutePath);
-        string sanitizedPath = Utils.SanitizePath(relativePath);
+        string sanitizedPath = ToVirtualPath(absolutePath);
 
         bool IsReplace = _files.ContainsKey(sanitizedPath);
 
@@ -381,8 +378,7 @@ public static class VirtualFS
     {
         EnsureInitialized(nameof(ReadBinaryFile));
 
-        string relativePath = ToRelativeSaveFilePath(absolutePath);
-        string sanitizedPath = Utils.SanitizePath(relativePath);
+        string sanitizedPath = ToVirtualPath(absolutePath);
 
         if (!_files.TryGetValue(sanitizedPath, out byte[] fileContent))
         {
@@ -558,10 +554,31 @@ public static class VirtualFS
         RequiredMode(Mode.Idle, nameof(WriteZipToDisk));
         RequireNotEmpty(nameof(WriteZipToDisk));
 
-        Utils.CreateArchiveWithDefaults(zipPath, _files);
+        Utils.CreateArchiveWithDefaults(zipPath, _files, GetEmptyDirectories());
 
         MechanicaSaveFix.Log.LogDebug($"Wrote {_files.Count} files to zip archive at \"{zipPath}\".");
         return _files.Count;
+    }
+
+    private static IEnumerable<string> GetEmptyDirectories()
+    {
+        foreach (string directory in _directories)
+        {
+            string prefix = GetPathPrefix(directory);
+            bool containsFile = false;
+
+            foreach (string file in _files.Keys)
+            {
+                if (file.StartsWith(prefix, StringComparison.Ordinal))
+                {
+                    containsFile = true;
+                    break;
+                }
+            }
+
+            if (!containsFile)
+                yield return directory;
+        }
     }
     
     /// <summary>

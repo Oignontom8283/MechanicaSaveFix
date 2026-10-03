@@ -630,9 +630,29 @@ public static class Utils
     /// <param name="entries">The entry name/content pairs to write into the archive.</param>
     public static void CreateArchiveWithDefaults(string zipPath, IReadOnlyDictionary<string, byte[]> entries)
     {
+        CreateArchiveWithDefaults(zipPath, entries, null);
+    }
+
+    /// <summary>
+    /// Creates a new zip archive with file entries and explicit empty-directory entries.
+    /// </summary>
+    /// <param name="zipPath">The path where the archive will be created.</param>
+    /// <param name="entries">The file entry name/content pairs to write into the archive.</param>
+    /// <param name="directories">The empty directory paths to write as explicit archive entries.</param>
+    public static void CreateArchiveWithDefaults(string zipPath, IReadOnlyDictionary<string, byte[]> entries, IEnumerable<string> directories)
+    {
         using (var zipStream = new FileStream(zipPath, FileMode.Create, FileAccess.Write))
         using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Create))
         {
+            if (directories != null)
+            {
+                foreach (string directory in directories)
+                {
+                    string sanitizedDirectory = SanitizePath(directory).TrimEnd(new[] { '/' }) + "/";
+                    archive.CreateEntry(sanitizedDirectory, (CompressionLevel)MechanicaSaveFix.saveCompressionLevel.Value);
+                }
+            }
+
             foreach (var kvp in entries)
             {
                 string sanitizedEntryName = SanitizePath(kvp.Key);
