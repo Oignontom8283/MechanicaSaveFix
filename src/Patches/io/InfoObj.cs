@@ -108,7 +108,57 @@ public static class Patch_DirectoryInfo_CreateSubdirectory
         }
 
         string combined = Path.Combine(__instance.FullName, path);
-        __result = new DirectoryInfo(combined); // no-op : rien à créer, tout vit en RAM
+        if (!VirtualFS.InScope(combined))
+        {
+            return true;
+        }
+
+        VirtualFS.CreateDirectory(combined);
+        __result = new DirectoryInfo(combined);
+        return false;
+    }
+}
+
+
+// DirectoryInfo.Delete()
+
+[HarmonyPatch]
+public static class Patch_DirectoryInfo_Delete_1
+{
+    static MethodBase TargetMethod()
+    {
+        return AccessTools.Method(typeof(DirectoryInfo), nameof(DirectoryInfo.Delete), System.Type.EmptyTypes);
+    }
+
+    static bool Prefix(DirectoryInfo __instance)
+    {
+        if (!VirtualFS.InScope(__instance.FullName))
+        {
+            return true;
+        }
+
+        Forward.DeleteDirectory(__instance.FullName, recursive: false);
+        return false;
+    }
+}
+
+
+[HarmonyPatch]
+public static class Patch_DirectoryInfo_Delete_2
+{
+    static MethodBase TargetMethod()
+    {
+        return AccessTools.Method(typeof(DirectoryInfo), nameof(DirectoryInfo.Delete), new[] { typeof(bool) });
+    }
+
+    static bool Prefix(DirectoryInfo __instance, bool recursive)
+    {
+        if (!VirtualFS.InScope(__instance.FullName))
+        {
+            return true;
+        }
+
+        Forward.DeleteDirectory(__instance.FullName, recursive);
         return false;
     }
 }
@@ -145,6 +195,24 @@ public static class Patch_FileInfo_Exists
         }
 
         __result = Forward.FileExists(__instance.FullName);
+        return false;
+    }
+}
+
+
+// FileInfo.Delete()
+
+[HarmonyPatch(typeof(FileInfo), nameof(FileInfo.Delete))]
+public static class Patch_FileInfo_Delete
+{
+    static bool Prefix(FileInfo __instance)
+    {
+        if (!VirtualFS.InScope(__instance.FullName))
+        {
+            return true;
+        }
+
+        Forward.Delete(__instance.FullName);
         return false;
     }
 }

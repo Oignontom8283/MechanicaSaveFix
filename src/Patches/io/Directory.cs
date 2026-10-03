@@ -1,6 +1,7 @@
 using System.IO;
 using HarmonyLib;
 using System.Collections.Generic;
+using Game.Saving;
 
 
 [HarmonyPatch]
@@ -32,25 +33,22 @@ public static class Patch_Directory_CreateDirectory
         return AccessTools.Method(typeof(Directory), nameof(Directory.CreateDirectory), new[] { typeof(string) });
     }
 
-    static bool Prefix(string path)
+    static bool Prefix(string path, ref DirectoryInfo __result)
     {
         if (!VirtualFS.InScope(path))
         {
             return true;
         }
 
-        return false; // Skip the original method, as we don't want to create directories in the virtual file system.
+        VirtualFS.CreateDirectory(path);
+        __result = new DirectoryInfo(path);
+        return false;
     }
 }
 
-[HarmonyPatch]
+[HarmonyPatch(typeof(Directory), nameof(Directory.Delete), new[] { typeof(string) })]
 public static class Patch_Directory_Delete_1
 {
-    static System.Reflection.MethodBase TargetMethod()
-    {
-        return AccessTools.Method(typeof(Directory), nameof(Directory.Delete), new[] { typeof(string) });
-    }
-
     static bool Prefix(string path)
     {
         if (!VirtualFS.InScope(path))
@@ -64,14 +62,9 @@ public static class Patch_Directory_Delete_1
 }
 
 
-[HarmonyPatch]
+[HarmonyPatch(typeof(Directory), nameof(Directory.Delete), new[] { typeof(string), typeof(bool) })]
 public static class Patch_Directory_Delete_2
 {
-    static System.Reflection.MethodBase TargetMethod()
-    {
-        return AccessTools.Method(typeof(Directory), nameof(Directory.Delete), new[] { typeof(string), typeof(bool) });
-    }
-
     static bool Prefix(string path, bool recursive)
     {
         if (!VirtualFS.InScope(path))
@@ -311,6 +304,22 @@ public static class Patch_Directory_EnumerateFileSystemEntries_1
         }
         
         __result = Forward.EnumerateFileSystemEntries(path);
+        return false;
+    }
+}
+
+
+[HarmonyPatch(typeof(SaveManager), "DeleteDirectory", new[] { typeof(string) })]
+public static class Patch_SaveManager_DeleteDirectory
+{
+    static bool Prefix(string path)
+    {
+        if (!VirtualFS.InScope(path))
+        {
+            return true;
+        }
+
+        Forward.DeleteDirectory(path, recursive: true);
         return false;
     }
 }
